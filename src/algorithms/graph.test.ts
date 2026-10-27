@@ -101,6 +101,18 @@ describe('graph preparation', () => {
       ],
     }).ok).toBe(true)
   })
+
+  it('rejects overflowing canonical sums regardless of input order near MAX_VALUE', () => {
+    const edges = [
+      { source: 'B', target: 'C', weight: Number.MAX_VALUE },
+      { source: 'A', target: 'B', weight: 2 ** 969 },
+      { source: 'A', target: 'C', weight: 2 ** 969 },
+    ]
+    const original = prepareGraph({ vertices: ['A', 'B', 'C'], edges })
+    const reversed = prepareGraph({ vertices: ['A', 'B', 'C'], edges: [...edges].reverse() })
+    expect(original).toMatchObject({ ok: false, error: { code: 'WEIGHT_OVERFLOW' } })
+    expect(reversed).toEqual(original)
+  })
 })
 
 describe('shared BFS connectivity', () => {

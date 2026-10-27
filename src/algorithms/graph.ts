@@ -40,7 +40,6 @@ export function prepareGraph(input: unknown): Result<NormalizedGraph> {
 
   const edges: NormalizedEdge[] = []
   const edgeIds = new Set<string>()
-  let absoluteWeightSum = 0
   for (const edge of input.edges) {
     if (!isRecord(edge) || typeof edge.source !== 'string' || typeof edge.target !== 'string') {
       return failure('INVALID_EDGE', '각 간선에는 문자열 source와 target이 필요합니다.')
@@ -61,15 +60,20 @@ export function prepareGraph(input: unknown): Result<NormalizedGraph> {
       return failure('DUPLICATE_EDGE', `무방향 간선 ${source}–${target}이(가) 중복되었습니다.`)
     }
     edgeIds.add(id)
-    absoluteWeightSum += Math.abs(edge.weight)
-    if (!Number.isFinite(absoluteWeightSum)) {
-      return failure('WEIGHT_OVERFLOW', '가중치 절댓값의 합이 숫자 표현 범위를 초과합니다.')
-    }
     // Single-character labels retain assignment names such as BC; JSON handles arbitrary labels.
     const name = source.length === 1 && target.length === 1 ? source + target : id
     edges.push(Object.freeze({ id, name, source, target, weight: edge.weight }))
   }
   edges.sort(compareNames)
+  // Match snapshot reduction order: input-order summation can hide overflow through rounding.
+  // In this fixed order, the positive absolute sum bounds every signed active-edge subset sum.
+  let absoluteWeightSum = 0
+  for (const edge of edges) {
+    absoluteWeightSum += Math.abs(edge.weight)
+    if (!Number.isFinite(absoluteWeightSum)) {
+      return failure('WEIGHT_OVERFLOW', '가중치 절댓값의 합이 숫자 표현 범위를 초과합니다.')
+    }
+  }
   if (connectedComponents(vertices, edges).length !== 1) {
     return failure('DISCONNECTED_GRAPH', '그래프가 연결되어 있지 않아 최소 신장 트리를 만들 수 없습니다.')
   }
