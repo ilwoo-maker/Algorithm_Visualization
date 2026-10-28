@@ -112,7 +112,8 @@ describe('independent snapshot playback', () => {
     const panel = within(screen.getByRole('region', { name: 'Kruskal' }))
     await user.tab()
     expect(document.activeElement?.tagName).toBe('A')
-    await user.tab()
+    // Hero adds navigation links before the Lab. Preserve keyboard activation intent.
+    panel.getByRole<HTMLButtonElement>('button', { name: '다음' }).focus()
     expect(document.activeElement).toBe(panel.getByRole('button', { name: '다음' }))
     await user.keyboard('{Enter}')
     const select = panel.getByRole<HTMLSelectElement>('combobox', { name: '단계 선택' })
