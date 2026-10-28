@@ -1,0 +1,28 @@
+.algorithm-site { min-height: 100vh; background: #08121f; }
+.algorithm-floating-background { background: radial-gradient(ellipse at 14% 18%, #123c38 0, transparent 48%), radial-gradient(ellipse at 90% 32%, #102e46 0, transparent 52%), linear-gradient(145deg, #07111c, #101b29 58%, #08121f); }
+.floating-art-field { position: absolute; inset: 0; opacity: var(--art-intensity, 1); transition: opacity .55s ease; }
+.art-anchor { position: absolute; width: clamp(350px, 33vw, 500px); aspect-ratio: 440 / 410; }
+.art-anchor svg { display: block; width: 100%; height: auto; overflow: visible; }
+.art-scroll, .art-mouse, .art-float { width: 100%; transform-origin: center; }
+.art-tree { left: -3%; top: 5%; }
+.art-k5 { right: -3%; top: 1%; opacity: .86; }
+.art-directed { left: -5%; bottom: -3%; opacity: .9; }
+.art-mesh { right: -5%; bottom: -3%; opacity: .72; }
+.algorithm-content .hero-section > div:first-child { background: rgba(248, 251, 252, .96); padding: clamp(16px, 2vw, 28px); border-radius: 16px; }
+.algorithm-content .concept-section, .algorithm-content .lab-section, .algorithm-content .theory-section { background: rgba(248, 251, 252, .985); border-radius: 12px; box-shadow: 0 0 0 16px rgba(248, 251, 252, .985); }
+.algorithm-content .page-footer { color: #d1e3ee; }
+@media (max-width: 768px) {
+  .art-anchor { width: clamp(240px, 72vw, 310px); }
+  .art-k5, .art-mesh { display: none; }
+  .art-tree { top: 9%; left: -16%; opacity: .8; }
+  .art-directed { bottom: 1%; left: auto; right: -18%; opacity: .65; }
+  .art-packet { display: none; }
+  .algorithm-content .concept-section, .algorithm-content .lab-section, .algorithm-content .theory-section { box-shadow: 0 0 0 8px rgba(248, 251, 252, .985); }
+}
+@media (prefers-reduced-motion: reduce) { .floating-art-field { transition: none; } .art-packet { display: none; } }
+@media print {
+  .algorithm-floating-background { display: none !important; }
+  .algorithm-site { background: white !important; min-height: 0; }
+  .algorithm-content { position: static !important; z-index: auto !important; }
+  .algorithm-content .theory-section { background: white !important; box-shadow: none !important; }
+}
