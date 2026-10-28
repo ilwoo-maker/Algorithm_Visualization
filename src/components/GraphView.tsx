@@ -1,6 +1,6 @@
 import { useId } from 'react'
 import type { RefObject } from 'react'
-import type { Snapshot } from '../algorithms/types'
+import type { NormalizedEdge, Snapshot } from '../algorithms/types'
 import type { TransitionPhase } from '../animation/playbackTiming'
 import { EDGE_STYLES, VERTEX_POSITIONS, VERTEX_STYLE, WEIGHT_POSITIONS } from './graphPresentation'
 
@@ -12,12 +12,14 @@ interface GraphViewProps {
   target?: Snapshot
   final?: boolean
   finalWeight?: number
+  finalMst?: readonly NormalizedEdge[]
   noticeRef?: RefObject<HTMLParagraphElement | null>
 }
 
-export function GraphView({ snapshot, name, svgRef, phase, target, final = false, finalWeight, noticeRef }: GraphViewProps) {
+export function GraphView({ snapshot, name, svgRef, phase, target, final = false, finalWeight, finalMst, noticeRef }: GraphViewProps) {
   const descriptionId = useId()
   const candidate = target?.edges.find(edge => edge.id === target.edgeId)
+  const mstIds = new Set(finalMst?.map(edge => edge.id))
   const phases = { idle: '선택한 단계 표시', entrance: '그래프 구성 중 · 조작하면 즉시 표시', focus: '검사 중', decision: '판정 연출 중', settle: '확정 준비 중', completion: 'MST 완료 연출', announcement: 'MST 완료 안내', reading: '설명 읽기' }
   const disconnected = snapshot.algorithm === 'reverse-delete' && snapshot.components.length > 1
   return (
@@ -38,7 +40,7 @@ export function GraphView({ snapshot, name, svgRef, phase, target, final = false
         return (
           <g key={edge.id} role="group" data-edge-id={edge.id} data-edge-name={edge.name} aria-label={`간선 ${edge.name}, 가중치 ${edge.weight}, ${style.label}`} aria-current={current ? 'true' : undefined}>
             {current && !final && edge.status !== 'removed' && <line className="current-edge-halo" aria-hidden="true" x1={start.x} y1={start.y} x2={end.x} y2={end.y} strokeDasharray={style.dash} />}
-            <line className="graph-edge" x1={start.x} y1={start.y} x2={end.x} y2={end.y} stroke={style.color} strokeWidth={style.width} strokeDasharray={style.dash} />
+            <line className="graph-edge" x1={start.x} y1={start.y} x2={end.x} y2={end.y} stroke={style.color} strokeWidth={style.width} strokeDasharray={style.dash} opacity={final && finalMst && !mstIds.has(edge.id) ? 0.35 : 1} />
             <line className="edge-effect" aria-hidden="true" x1={start.x} y1={start.y} x2={end.x} y2={end.y} stroke={style.color} strokeWidth={style.width} opacity="0" />
             {current && <>
               <line className="edge-streak-glow" aria-hidden="true" x1={start.x} y1={start.y} x2={end.x} y2={end.y} strokeWidth="10" opacity="0" />

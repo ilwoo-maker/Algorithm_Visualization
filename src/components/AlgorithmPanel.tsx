@@ -65,7 +65,7 @@ export function AlgorithmPanel({ run }: { run: MstRun }) {
 
       <div className="graph-area">
         <div className="graph-toolbar"><span className="graph-caption">동일 입력 그래프</span><span className="current-caption">{isFinal ? '최종 MST · 검사 강조 종료' : <><i aria-hidden="true" />금색 테두리: 현재 간선</>}</span></div>
-        <GraphView snapshot={snapshot} name={name} svgRef={svg} phase={playback.phase} target={target} final={isFinal} finalWeight={run.totalWeight} noticeRef={notice} />
+        <GraphView snapshot={snapshot} name={name} svgRef={svg} phase={playback.phase} target={target} final={isFinal} finalWeight={run.totalWeight} finalMst={isFinal ? run.mst : undefined} noticeRef={notice} />
         <div className="graph-legend" aria-label="간선 상태 범례">
           {statuses.map((status) => <span className="legend-item" key={status}><svg width="22" height="10" aria-hidden="true"><line x1="1" y1="5" x2="21" y2="5" stroke={EDGE_STYLES[status].color} strokeWidth={EDGE_STYLES[status].width} strokeDasharray={EDGE_STYLES[status].dash} /></svg>{EDGE_STYLES[status].label}</span>)}
         </div>

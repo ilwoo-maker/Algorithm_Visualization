@@ -69,8 +69,8 @@ function completion(timeline: gsap.core.Timeline, svg: SVGSVGElement, scene: Com
   const announcement = start + PLAYBACK_TIMING.bloom
   timeline.addLabel('announcement', announcement).call(onAnnounce, [], 'announcement')
   const notice = scene.noticeRef?.current
-  if (notice) timeline.fromTo(notice, { opacity: 0, scale: 0.96, transformOrigin: 'center' },
-    { opacity: 1, scale: 1, duration: PLAYBACK_TIMING.announcement, immediateRender: false }, 'announcement')
+  if (notice) timeline.fromTo(notice, { opacity: 0, y: 8 },
+    { opacity: 1, y: 0, duration: PLAYBACK_TIMING.announcement, ease: 'power2.out', immediateRender: false }, 'announcement')
 }
 
 /** Snapshot attributes define the settled state; every temporary scene mutation is reverted. */
