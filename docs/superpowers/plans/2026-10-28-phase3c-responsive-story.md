@@ -51,3 +51,5 @@ Files: TheorySection.tsx, theoryContent.tsx, index.css, theoryPrint.test.tsx.
 Baseline verified: dev caea53518bfc5d6f2dfe73f3089ffa103a50392d, clean,0 behind/5ahead;223tests/10files PASS. Existing GSAP ScrollTrigger.js present, Lucide absent. User explicitly specifies current dev and progressive Gate commits, so no separate worktree or approval pause.
 
 Gate A: four sections extracted with stable existing panel owners; new2tests RED→GREEN,225total PASS,build/lint PASS. Keyboard regression test now explicitly focuses Next after the new Hero navigation links; activation/state assertions retained.
+
+Gate B: one Hero-local real ScrollTrigger, no pin/scroll lock; small/reduced static fallback and read-only snapshot concept scenes.4new tests RED→GREEN including real trigger StrictMode/media cleanup and Lab isolation.229total PASS,build/lint/diff PASS.
