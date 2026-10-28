@@ -55,3 +55,5 @@ Gate A: four sections extracted with stable existing panel owners; new2tests RED
 Gate B: one Hero-local real ScrollTrigger, no pin/scroll lock; small/reduced static fallback and read-only snapshot concept scenes.4new tests RED→GREEN including real trigger StrictMode/media cleanup and Lab isolation.229total PASS,build/lint/diff PASS.
 
 Gate C:1200px content-width threshold, stable mounted tabpanels, existing pause callback on hidden panels, roving focus and resize preservation.4new RED→GREEN tests;233total PASS,build/lint/diff PASS. Five existing motion matchMedia stubs now distinguish reduced-motion from viewport queries; their verification assertions remain unchanged.
+
+Gate D: authoritative raw Markdown rendered as semantic theory, source-derived cost rows, expanded final comparison and print CSS independent of current Lab/tab.3new tests RED→GREEN;236total PASS,build/lint/diff PASS. Resolved Gate C's effect dependency lint warning by destructuring stable pause/status, and separated pure document helpers from JSX for Fast Refresh. Print preview remains unverified.
