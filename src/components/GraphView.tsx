@@ -25,7 +25,7 @@ export function GraphView({ snapshot, name }: GraphViewProps) {
           <g key={edge.id} role="group" aria-label={`간선 ${edge.name}, 가중치 ${edge.weight}, ${style.label}`} aria-current={current ? 'true' : undefined}>
             {current && <line className="current-edge-halo" x1={start.x} y1={start.y} x2={end.x} y2={end.y} />}
             <line x1={start.x} y1={start.y} x2={end.x} y2={end.y} stroke={style.color} strokeWidth={style.width} strokeDasharray={style.dash} />
-            <rect className={current ? 'weight-badge is-current' : 'weight-badge'} x={label.x - 15} y={label.y - 13} width="30" height="26" rx="8" />
+            <rect className={current ? 'weight-badge is-current' : 'weight-badge'} x={label.x - 17} y={label.y - 15} width="34" height="30" rx="8" />
             <text className="weight-text" x={label.x} y={label.y} dominantBaseline="central" textAnchor="middle">{edge.weight}</text>
           </g>
         )

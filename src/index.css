@@ -57,40 +57,40 @@ h1 span { color: var(--teal); }
 .panel-header > p { margin: 10px 0 0 36px; font-size: 11px; color: var(--muted); }
 .graph-area { background-color: #fbfcfd; background-image: radial-gradient(#d3dce6 0.65px, transparent 0.65px); background-size: 18px 18px; border-bottom: 1px solid var(--border); }
 .graph-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 24px 0; }
-.graph-caption { font-size: 10px; font-weight: 600; color: #6d7a8b; }
-.current-caption { font-size: 10px; color: #657286; display: flex; gap: 5px; align-items: center; }
+.graph-caption { font-size: 11px; font-weight: 600; color: #536176; }
+.current-caption { font-size: 11px; color: #536176; display: flex; gap: 5px; align-items: center; }
 .current-caption i { width: 8px; height: 8px; border: 2px solid #d19b27; border-radius: 3px; background: #fff5d6; }
 .graph-svg { width: 100%; height: auto; display: block; max-height: 350px; }
 .graph-svg line { stroke-linecap: round; }
 .current-edge-halo { stroke: #efca6c; stroke-width: 11; opacity: .5; }
 .weight-badge { fill: #fff; stroke: #e0e5eb; stroke-width: 1; }
 .weight-badge.is-current { fill: #fff2c9; stroke: #b77d13; stroke-width: 1.5; }
-.weight-text { font-size: 14px; font-weight: 700; fill: #334358; font-variant-numeric: tabular-nums; }
+.weight-text { font-size: 16px; font-weight: 700; fill: #26384a; font-variant-numeric: tabular-nums; }
 .vertex circle { fill: #fff; stroke: #3d5167; stroke-width: 2; }
 .vertex text { fill: #263b50; font-size: 15px; font-weight: 700; }
 .graph-legend { padding: 0 18px 16px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 16px; }
-.legend-item { display: inline-flex; align-items: center; gap: 5px; color: #536176; font-size: 10px; }
-.panel-content { padding: 22px 26px 16px; }
+.legend-item { display: inline-flex; align-items: center; gap: 5px; color: #47566b; font-size: 11px; }
+.panel-playback { padding: 16px 26px; border-bottom: 1px solid var(--border); }
+.panel-content { padding: 18px 26px 16px; }
 .step-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .step-heading p { margin: 0; }
 .step-index { font-size: 27px; font-weight: 600; color: #27394c; letter-spacing: -1px; font-variant-numeric: tabular-nums; }
 .step-total { font-size: 11px; color: #687588; }
 .action-badge { background: #f0f3f6; color: #58677c; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; }
-.step-progress { display: flex; gap: 4px; margin: 12px 0 20px; }
+.step-progress { display: flex; gap: 4px; margin: 10px 0 12px; }
 .step-progress span { height: 3px; background: #e8edf2; flex: 1; border-radius: 2px; }
 .step-progress .filled { background: var(--panel-accent); }
-.step-controls { display: flex; gap: 12px; justify-content: space-between; align-items: end; margin-bottom: 24px; }
+.step-controls { display: flex; gap: 12px; justify-content: space-between; align-items: end; }
 .step-buttons { display: flex; gap: 6px; flex-shrink: 0; }
-.step-buttons button { background: white; border: 1px solid #d8e0e7; border-radius: 7px; padding: 0 11px; min-height: 42px; font-size: 11px; font-weight: 600; color: #415167; }
+.step-buttons button { display: inline-flex; justify-content: center; align-items: center; gap: 4px; white-space: nowrap; background: white; border: 1px solid #d8e0e7; border-radius: 7px; padding: 0 10px; min-height: 44px; font-size: 12px; font-weight: 600; color: #415167; }
 .step-buttons button:not(:disabled):hover { background: #f2f6f8; border-color: #9eaebf; }
 .step-buttons button span { font-size: 15px; padding-inline: 1px; }
 .step-buttons .next-button { background: #243e48; color: #fff; border-color: #243e48; }
 .step-buttons .next-button:not(:disabled):hover { background: #126c62; border-color: #126c62; }
 .step-buttons button:disabled { color: #8995a3; background: #f4f6f8; border-color: #e7ebef; }
 .step-select { min-width: 0; flex: 1; max-width: 205px; }
-.step-select label { display: block; font-size: 10px; color: #617086; margin-bottom: 6px; }
-.step-select select { width: 100%; min-height: 42px; border: 1px solid #d8e0e7; border-radius: 7px; background: #fff; color: #415167; font-size: 11px; padding: 0 8px; cursor: pointer; }
-.explanation { min-height: 202px; }
+.step-select label { display: block; font-size: 11px; color: #536176; margin-bottom: 5px; }
+.step-select select { width: 100%; min-height: 44px; border: 1px solid #d8e0e7; border-radius: 7px; background: #fff; color: #415167; font-size: 12px; padding: 0 8px; cursor: pointer; }
 .explanation-block { margin-bottom: 15px; }
 .explanation-block h4 { font-size: 11px; font-weight: 700; margin: 0 0 7px; display: flex; align-items: center; gap: 7px; }
 .explanation-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--panel-accent); }
@@ -98,6 +98,7 @@ h1 span { color: var(--teal); }
 .why-block { padding: 14px 15px; border-radius: 8px; background: #f5f7f9; border-left: 2px solid #dae4e8; }
 .why-block p { color: #516276; }
 .completion-label { font-size: 12px; color: #087363; font-weight: 700; padding: 11px 13px; background: #edf8f3; border-radius: 7px; margin: 0 0 15px; }
+.termination-note { background: #f0f8f4; border: 1px solid #cce5db; color: #295e50; font-size: 12px; line-height: 1.9; padding: 12px 14px; border-radius: 8px; margin: 0 0 16px; word-break: keep-all; overflow-wrap: anywhere; }
 .disconnection-note { background: #fff7e8; border: 1px solid #ebd3a4; color: #85520b; font-size: 11px; line-height: 1.9; padding: 12px 14px; border-radius: 8px; margin: 0 0 16px; word-break: keep-all; }
 .metrics { display: grid; grid-template-columns: 1.35fr 1fr 1fr; gap: 10px; border-block: 1px solid var(--border); padding-block: 17px; }
 .metric { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
@@ -127,6 +128,20 @@ h1 span { color: var(--teal); }
 .status-removed { color: #606e81; background: #eef1f4; text-decoration: line-through; text-decoration-color: #8c98a7; }
 .status-kept { color: #2e55a6; background: #edf2fd; }
 .current-row-label { color: #8b6118; font-size: 9px; margin-left: 7px; }
+.final-comparison { margin-top: 28px; padding: 26px; border: 1px solid #dce3e9; border-radius: 15px; background: #fff; }
+.final-comparison-heading .eyebrow { margin-bottom: 9px; }
+.final-comparison h2 { font-size: 19px; font-weight: 700; letter-spacing: -.6px; margin: 0 0 8px; }
+.final-comparison-heading > p:last-child, .tie-note { color: #536176; font-size: 12px; line-height: 1.8; word-break: keep-all; overflow-wrap: anywhere; }
+.final-comparison-heading > p:last-child { margin: 0 0 18px; }
+.final-comparison table { width: 100%; table-layout: fixed; border-collapse: collapse; text-align: left; font-size: 13px; line-height: 1.8; }
+.final-comparison th, .final-comparison td { padding: 12px 16px; overflow-wrap: anywhere; vertical-align: top; }
+.final-comparison th { font-weight: 600; }
+.final-comparison th:first-child { width: 24%; }
+.final-comparison thead { background: #f3f7f8; }
+.final-comparison tbody tr { border-bottom: 1px solid var(--border); }
+.final-comparison tbody th { color: #536176; }
+.final-comparison .final-weight { color: var(--teal); font-size: 22px; font-weight: 700; }
+.tie-note { margin: 15px 0 0; }
 .page-footer { padding: 25px 0 30px; display: flex; align-items: center; justify-content: space-between; gap: 20px; color: #6c798a; font-size: 10px; }
 .page-footer > span:first-child { font-weight: 600; }
 .page-footer > span:last-child { font-size: 8px; letter-spacing: 1px; }
@@ -136,11 +151,11 @@ h1 span { color: var(--teal); }
   .page-width { width: calc(100% - 48px); }
   .panel-header { padding-inline: 20px; }
   .panel-content { padding-inline: 20px; }
+  .panel-playback { padding-inline: 20px; }
   .step-controls { flex-wrap: wrap; }
   .step-select { max-width: none; min-width: 100%; }
   .step-buttons { width: 100%; }
   .step-buttons button { flex: 1; }
-  .explanation { min-height: 225px; }
   .intro { gap: 25px; }
   .page-footer > span:last-child { display: none; }
 }
@@ -159,25 +174,39 @@ h1 span { color: var(--teal); }
   .comparison-grid { grid-template-columns: 1fr; gap: 24px; }
   .comparison-heading { align-items: flex-start; flex-direction: column; gap: 8px; }
   .comparison-heading h2 { font-size: 13px; }
-  .comparison-heading p { font-size: 10px; }
+  .comparison-heading p { font-size: 11px; line-height: 1.7; }
   .panel-header { padding: 22px 20px 18px; }
-  .panel-header > p { margin-left: 0; }
+  .panel-header > p { margin-left: 0; font-size: 12px; line-height: 1.7; }
   .panel-title-row h3 { font-size: 21px; }
   .panel-title-row { gap: 8px; }
   .approach-tag { font-size: 9px; }
   .graph-toolbar { padding-inline: 18px; }
   .graph-legend { gap: 10px 12px; }
-  .weight-text { font-size: 18px; }
-  .vertex text { font-size: 19px; }
-  .explanation { min-height: 0; }
+  .weight-text { font-size: 22px; }
+  .vertex text { font-size: 20px; }
+  .step-controls { gap: 9px; }
+  .step-buttons button { padding-inline: 8px; }
+  .step-total, .action-badge { font-size: 12px; }
+  .legend-item { font-size: 12px; }
+  .explanation-block h4 { font-size: 12px; }
+  .explanation-block p, .disconnection-note, .termination-note { font-size: 13px; }
+  .metric > span { font-size: 11px; line-height: 1.5; min-height: 3em; }
+  .metric small { font-size: 11px; line-height: 1.6; }
+  .components-info h4, .components-info li, .edge-details summary, .edge-details thead, .edge-status, .current-row-label { font-size: 12px; }
+  .edge-details table { font-size: 12px; }
+  .components-info { gap: 10px; flex-wrap: wrap; }
+  .final-comparison { padding: 20px 16px; }
+  .final-comparison h2 { font-size: 18px; }
+  .final-comparison table { font-size: 12px; }
+  .final-comparison th, .final-comparison td { padding: 10px 7px; }
   .page-footer { flex-direction: column; align-items: flex-start; gap: 7px; padding-block: 22px; }
 }
 
 @media (max-width: 360px) {
   .panel-content { padding-inline: 15px; }
   .panel-header { padding-inline: 15px; }
+  .panel-playback { padding-inline: 15px; }
   .approach-tag { margin-left: 33px; }
   .metrics { gap: 6px; }
-  .metric > span { font-size: 9px; }
   .brand { gap: 9px; font-size: 12px; }
 }
