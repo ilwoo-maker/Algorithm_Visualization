@@ -69,7 +69,6 @@ export function useFloatingBackground(ref: RefObject<HTMLDivElement | null>) {
             if (!active) return
             const amplitude = mobile?.matches ? 0.45 : 1
             gsap.to(cluster.querySelector('.art-float'), { x: (i % 2 ? 8 : -8) * amplitude, y: (i % 2 ? -13 : 11) * amplitude, rotation: i === 1 ? 5 : i % 2 ? -2 : 3, duration: 12 + i * 3, delay: i * 0.9, repeat: -1, yoyo: true, ease: 'sine.inOut' })
-            if (!mobile?.matches) gsap.to(cluster.querySelector('.art-packet'), { strokeDashoffset: -100, duration: 3.8 + i * 1.2, delay: i * 0.7, repeat: -1, ease: 'none' })
             const setX = gsap.quickSetter(scrollLayers[i], 'x', 'px'), setY = gsap.quickSetter(scrollLayers[i], 'y', 'px')
             scrollSetters[i] = { x: value => { setX(value) }, y: value => { setY(value) } }
             if (fine?.matches && !mobile?.matches) {

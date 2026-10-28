@@ -15,19 +15,10 @@ it('mounts one inert fixed background behind the interactive content without poi
   expect(document.querySelector<HTMLElement>('.algorithm-content')!.style.zIndex).toBe('1')
   expect(root.querySelectorAll('button, a, input, [tabindex]')).toHaveLength(0)
 })
-it('draws a binary tree, ten distinct K5 pairs, directed arrows and weighted mesh as separate art', () => {
-  render(<App />); const root = background()
-  for (const [kind, count, edges] of [['tree', 7, 6], ['k5', 5, 10], ['directed', 4, 4], ['mesh', 9, 14]] as const) {
-    const cluster = root.querySelector(`[data-art-cluster="${kind}"]`)!
-    expect(cluster.querySelectorAll('[data-art-node]')).toHaveLength(count)
-    expect(cluster.querySelectorAll('[data-art-edge]')).toHaveLength(edges)
-  }
-  const pairs = [...root.querySelectorAll('[data-art-cluster="k5"] [data-art-edge]')].map(edge => edge.getAttribute('data-art-edge'))
-  expect(new Set(pairs).size).toBe(10)
-  expect(root.querySelectorAll('[data-art-cluster="directed"] .art-edge[marker-end]')).toHaveLength(4)
-  expect(root.querySelectorAll('.art-weight')).toHaveLength(4)
-  expect(root.querySelectorAll('filter').length).toBeLessThanOrEqual(4)
-  for (const svg of root.querySelectorAll('svg')) expect(svg.getAttribute('focusable')).toBe('false')
+it('mounts four noninteractive Canvas illustrations', () => {
+  render(<App />)
+  expect(background().querySelectorAll('canvas')).toHaveLength(4)
+  for (const canvas of background().querySelectorAll('canvas')) expect(canvas.getAttribute('tabindex')).toBeNull()
 })
 it('does not own or alter Lab state and leaves existing controls usable', () => {
   render(<App />); const root = background(), panel = within(screen.getByRole('region', { name: 'Kruskal' }))
@@ -54,7 +45,7 @@ it('owns bounded independent floats and packets and reverts everything under Str
   const owners = floats.map(element => gsap.getTweensOf(element))
   for (const tweens of owners) { expect(tweens).toHaveLength(1); expect(tweens[0].repeat()).toBe(-1) }
   expect(new Set(owners.map(tweens => tweens[0].duration())).size).toBe(4)
-  expect(root.querySelectorAll('.art-packet')).toHaveLength(4)
+  expect(root.querySelectorAll('canvas')).toHaveLength(4)
   const all = artTweens(); expect(all.length).toBeLessThanOrEqual(16)
   view.unmount()
   for (const animation of all) expect(animation.parent).toBeNull()
@@ -63,7 +54,7 @@ it('owns bounded independent floats and packets and reverts everything under Str
 it('Reduced Motion leaves static artwork and mobile rebuild omits hidden clusters and packets', () => {
   const change = preferences(); render(<App />); const root = background()
   change('(prefers-reduced-motion: reduce)', true); expect(artTweens()).toHaveLength(0)
-  expect(root.querySelectorAll('svg')).toHaveLength(4)
+  expect(root.querySelectorAll('canvas')).toHaveLength(4)
   change('(max-width: 768px)', true); change('(prefers-reduced-motion: reduce)', false)
   expect(gsap.getTweensOf(root.querySelector('[data-art-cluster="k5"] .art-float')!)).toHaveLength(0)
   expect(gsap.getTweensOf(root.querySelector('[data-art-cluster="tree"] .art-float')!)).toHaveLength(1)
@@ -96,19 +87,6 @@ it('updates section intensity and bounded pointer parallax without navigating th
   expect(panel.getByRole<HTMLSelectElement>('combobox').value).toBe('3')
   const before = gsap.getTweensOf(root.querySelector('.art-float')!)[0]
   fireEvent.resize(window); expect(gsap.getTweensOf(root.querySelector('.art-float')!)[0]).toBe(before)
-})
-it('keeps every directed arrow tip outside its opaque destination node disc', () => {
-  render(<App />); const cluster = background().querySelector('[data-art-cluster="directed"]')!
-  const marker = cluster.querySelector('marker')!, path = marker.querySelector('path')!
-  const coordinates = path.getAttribute('d')!.match(/[\d.]+/g)!.map(Number)
-  const tip = Math.max(...coordinates.filter((_, index) => index % 2 === 0))
-  const scale = Number(marker.getAttribute('markerWidth')) / Number(marker.getAttribute('viewBox')!.split(' ')[2])
-  const gap = (Number(marker.getAttribute('refX')) - tip) * scale
-  for (const edge of cluster.querySelectorAll('[data-art-edge]')) {
-    const target = edge.getAttribute('data-art-edge')!.split('-')[1]
-    const disc = cluster.querySelector(`[data-art-node="${target}"] circle[fill="#091826"]`)!
-    expect(gap).toBeGreaterThan(Number(disc.getAttribute('r')) + 1)
-  }
 })
 it('retains bounded scroll parallax beyond the introductory viewport range', async () => {
   preferences(); render(<App />)
