@@ -1,28 +1,26 @@
-import { useId, useMemo, useRef } from 'react'
+import { useId } from 'react'
 import type { RefObject } from 'react'
-import type { MstRun, Snapshot } from '../algorithms/types'
-import { useEdgeTransition } from '../animation/useEdgeTransition'
+import type { Snapshot } from '../algorithms/types'
+import type { TransitionPhase } from '../animation/playbackTiming'
 import { EDGE_STYLES, VERTEX_POSITIONS, WEIGHT_POSITIONS } from './graphPresentation'
 
 interface GraphViewProps {
   snapshot: Snapshot
   name: string
-  animateForward?: boolean
-  revision?: number
-  finalRun?: MstRun
-  weightRef?: RefObject<HTMLOutputElement | null>
+  svgRef: RefObject<SVGSVGElement | null>
+  phase: TransitionPhase
+  target?: Snapshot
 }
 
-export function GraphView({ snapshot, name, animateForward = false, revision = 0, finalRun, weightRef }: GraphViewProps) {
+export function GraphView({ snapshot, name, svgRef, phase, target }: GraphViewProps) {
   const descriptionId = useId()
-  const svg = useRef<SVGSVGElement>(null)
-  const finalScene = useMemo(() => finalRun ? { run: finalRun, weightRef } : undefined, [finalRun, weightRef])
-  const phase = useEdgeTransition(svg, snapshot, animateForward, revision, finalScene)
+  const candidate = target?.edges.find(edge => edge.id === target.edgeId)
+  const phases = { idle: '선택한 단계 표시', entrance: '그래프 구성 중 · 조작하면 즉시 표시', focus: '검사 중', decision: '판정 연출 중', settle: '확정 준비 중', completion: 'MST 완료 연출', reading: '설명 읽기' }
   const disconnected = snapshot.algorithm === 'reverse-delete' && snapshot.components.length > 1
   return (
     <>
-    <p className="motion-status" role="status">{phase === 'entrance' ? '그래프 구성 중 · 조작하면 즉시 표시' : phase === 'edge' ? '간선 전환 중 · 선택한 단계 기준' : '선택한 단계 표시'}</p>
-    <svg ref={svg} className="graph-svg" viewBox="0 0 520 340" role="img" aria-label={`${name} 그래프`} aria-describedby={descriptionId} aria-busy={phase !== 'idle'}>
+    <p className="motion-status" role="status">{phases[phase]}{candidate && ['focus', 'decision', 'settle'].includes(phase) ? ` · ${candidate.name} · 아래 정보는 ${snapshot.index}단계 확정 상태` : ''}</p>
+    <svg ref={svgRef} className="graph-svg" viewBox="0 0 520 340" role="img" aria-label={`${name} 그래프`} aria-describedby={descriptionId} aria-busy={phase !== 'idle' && phase !== 'reading'}>
       <desc id={descriptionId}>
         {snapshot.edges.map((edge) => `${edge.name}: 가중치 ${edge.weight}, ${EDGE_STYLES[edge.status].label}`).join('. ')}.
         연결 요소 {snapshot.components.length}개. 현재 검사 간선은 금색 테두리로 표시됩니다. 아래 표에서도 간선별 상태를 확인할 수 있습니다.
@@ -33,7 +31,7 @@ export function GraphView({ snapshot, name, animateForward = false, revision = 0
         const end = VERTEX_POSITIONS[edge.target]
         const label = WEIGHT_POSITIONS[edge.name]
         const style = EDGE_STYLES[edge.status]
-        const current = edge.id === snapshot.edgeId
+        const current = edge.id === (target?.edgeId ?? snapshot.edgeId)
         return (
           <g key={edge.id} role="group" data-edge-id={edge.id} data-edge-name={edge.name} aria-label={`간선 ${edge.name}, 가중치 ${edge.weight}, ${style.label}`} aria-current={current ? 'true' : undefined}>
             {current && edge.status !== 'removed' && <line className="current-edge-halo" aria-hidden="true" x1={start.x} y1={start.y} x2={end.x} y2={end.y} strokeDasharray={style.dash} />}
@@ -43,6 +41,8 @@ export function GraphView({ snapshot, name, animateForward = false, revision = 0
               <line className="edge-streak-glow" aria-hidden="true" x1={start.x} y1={start.y} x2={end.x} y2={end.y} strokeWidth="10" opacity="0" />
               <line className="edge-streak" aria-hidden="true" x1={start.x} y1={start.y} x2={end.x} y2={end.y} strokeWidth="3" opacity="0" />
               <circle className="light-head" aria-hidden="true" cx={start.x} cy={start.y} r="4" opacity="0" />
+              <line className="edge-cut" aria-hidden="true" x1={start.x} y1={start.y} x2={(start.x + end.x) / 2} y2={(start.y + end.y) / 2} stroke="#ffcc67" strokeWidth="4" opacity="0" />
+              <line className="edge-cut" aria-hidden="true" x1={end.x} y1={end.y} x2={(start.x + end.x) / 2} y2={(start.y + end.y) / 2} stroke="#ffcc67" strokeWidth="4" opacity="0" />
             </>}
             <g className="weight-label">
             <rect className={current ? 'weight-badge is-current' : 'weight-badge'} x={label.x - 17} y={label.y - 15} width="34" height="30" rx="8" />

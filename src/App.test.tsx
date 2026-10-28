@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from 'vitest'
-import { cleanup, render, screen, within } from '@testing-library/react'
+import { act, cleanup, render, screen, within } from '@testing-library/react'
+import { gsap } from 'gsap'
 import userEvent from '@testing-library/user-event'
 import App from './App'
 import { ASSIGNMENT_GRAPH } from './algorithms/fixtures'
@@ -97,6 +98,9 @@ describe('independent snapshot playback', () => {
     expect(panel.getByRole('note', { name: '임시 단절 안내' }).textContent).toContain('최종 MST')
     expect(panel.queryByText('최종 MST 완성')).toBeNull()
     await user.click(panel.getByRole('button', { name: '다음' }))
+    const effect = panel.getByRole('img').querySelector('g[aria-current="true"] .edge-effect')!
+    const tween = gsap.getTweensOf(effect)[0]
+    if (tween) act(() => { (tween.parent as gsap.core.Timeline).progress(1) })
     expect(panel.queryByRole('note', { name: '임시 단절 안내' })).toBeNull()
     expect(panel.getByLabelText('현재 활성 간선 가중치 합').textContent).toBe('11')
     expect(panel.getByRole('row', { name: /^BE 4 복구·유지/ })).toBeDefined()

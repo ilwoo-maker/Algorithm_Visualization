@@ -63,7 +63,7 @@ h1 span { color: var(--teal); }
 .graph-svg { width: 100%; height: auto; display: block; max-height: 350px; }
 .graph-svg line { stroke-linecap: round; }
 .motion-status { margin: 0; padding: 8px 24px 0; min-height: 25px; color: #c2d5e4; font-size: 11px; line-height: 1.6; }
-.edge-effect, .edge-streak, .edge-streak-glow, .light-head, .vertex-wave, .stage-flash, .component-boundary { pointer-events: none; }
+.edge-effect, .edge-cut, .edge-streak, .edge-streak-glow, .light-head, .vertex-wave, .stage-flash, .component-boundary { pointer-events: none; }
 .edge-streak-glow { stroke-opacity: .25; filter: drop-shadow(0 0 3px #ffdf90); }
 .light-head { filter: drop-shadow(0 0 3px #fff4cc); }
 .stage-note { margin: 0; padding: 0 18px 12px; font-size: 11px; line-height: 1.7; color: #bed1e0; text-align: center; word-break: keep-all; }
@@ -98,6 +98,13 @@ h1 span { color: var(--teal); }
 .step-select { min-width: 0; flex: 1; max-width: 205px; }
 .step-select label { display: block; font-size: 11px; color: #536176; margin-bottom: 5px; }
 .step-select select { width: 100%; min-height: 44px; border: 1px solid #d8e0e7; border-radius: 7px; background: #fff; color: #415167; font-size: 12px; padding: 0 8px; cursor: pointer; }
+.playback-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; justify-content: space-between; margin-top: 12px; }
+.playback-buttons, .speed-controls { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.playback-controls button { min-height: 44px; padding: 0 12px; border: 1px solid #d8e0e7; border-radius: 7px; background: #fff; color: #415167; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.playback-controls .play-button, .speed-controls button[aria-pressed="true"] { background: var(--panel-tint); color: var(--panel-accent); border-color: var(--panel-accent); }
+.speed-controls button { min-width: 44px; padding-inline: 8px; }
+.playback-status { margin: 9px 0 0; font-size: 12px; color: #536176; line-height: 1.7; overflow-wrap: anywhere; }
+.final-announcement { font-size: 12px; color: #087363; font-weight: 600; }
 .explanation-block { margin-bottom: 15px; }
 .explanation-block h4 { font-size: 11px; font-weight: 700; margin: 0 0 7px; display: flex; align-items: center; gap: 7px; }
 .explanation-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--panel-accent); }
@@ -219,5 +226,5 @@ h1 span { color: var(--teal); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .edge-effect, .edge-streak, .edge-streak-glow, .light-head, .vertex-wave, .stage-flash { display: none; }
+  .edge-effect, .edge-cut, .edge-streak, .edge-streak-glow, .light-head, .vertex-wave, .stage-flash { display: none; }
 }

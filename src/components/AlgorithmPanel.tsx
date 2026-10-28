@@ -1,17 +1,16 @@
-import { useId, useRef, useState } from 'react'
+import { useId, useRef } from 'react'
 import type { EdgeStatus, MstRun } from '../algorithms/types'
 import { GraphView } from './GraphView'
 import { ACTION_NAMES, EDGE_STYLES } from './graphPresentation'
+import { useAlgorithmPlayback } from '../animation/useEdgeTransition'
 
 export function AlgorithmPanel({ run }: { run: MstRun }) {
-  const [navigation, setNavigation] = useState({ index: 0, animateForward: false, revision: 0 })
-  const { index, animateForward, revision } = navigation
   const weight = useRef<HTMLOutputElement>(null)
-  const navigate = (target: number | ((index: number) => number), motion = false) => {
-    setNavigation(previous => ({ index: typeof target === 'number' ? target : target(previous.index), animateForward: motion, revision: previous.revision + 1 }))
-  }
+  const svg = useRef<SVGSVGElement>(null)
+  const playback = useAlgorithmPlayback(run, svg, weight)
+  const { index, snapshot, target } = playback
+  const requestedIndex = target?.index ?? index
   const id = useId()
-  const snapshot = run.snapshots[index]
   const isKruskal = run.algorithm === 'kruskal'
   const name = isKruskal ? 'Kruskal' : 'Reverse-Delete'
   const lastIndex = run.snapshots.length - 1
@@ -35,25 +34,37 @@ export function AlgorithmPanel({ run }: { run: MstRun }) {
 
         <div className="step-controls">
           <div className="step-buttons">
-            <button type="button" onClick={() => navigate(0)} disabled={index === 0}><span aria-hidden="true">↤</span> 처음으로</button>
-            <button type="button" onClick={() => navigate(value => Math.max(0, value - 1))} disabled={index === 0}><span aria-hidden="true">←</span> 이전</button>
-            <button className="next-button" type="button" onClick={() => navigate(value => Math.min(lastIndex, value + 1), true)} disabled={isFinal}>다음 <span aria-hidden="true">→</span></button>
+            <button type="button" onClick={() => playback.jump(0)} disabled={requestedIndex === 0}><span aria-hidden="true">↤</span> 처음으로</button>
+            <button type="button" onClick={playback.previous} disabled={requestedIndex === 0}><span aria-hidden="true">←</span> 이전</button>
+            <button className="next-button" type="button" onClick={playback.next} disabled={requestedIndex === lastIndex}>다음 <span aria-hidden="true">→</span></button>
           </div>
           <div className="step-select"><label htmlFor={`${id}-step`}>단계 선택</label><select id={`${id}-step`} value={index}
-            onPointerDown={() => navigate(index)}
-            onKeyDown={(event) => { if ([' ', 'Enter', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) navigate(index) }}
-            onChange={(event) => navigate(Number(event.target.value))}>
+            onPointerDown={() => playback.jump(index)}
+            onKeyDown={(event) => { if ([' ', 'Enter', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) playback.jump(index) }}
+            onChange={(event) => playback.jump(Number(event.target.value))}>
             {run.snapshots.map((step) => {
               const edge = step.edges.find((candidate) => candidate.id === step.edgeId)
               return <option value={step.index} key={step.index}>{String(step.index).padStart(2, '0')} · {edge ? `${edge.name} ` : ''}{ACTION_NAMES[step.action]}</option>
             })}
           </select></div>
         </div>
+        <div className="playback-controls">
+          <div className="playback-buttons">
+            <button type="button" className="play-button" onClick={playback.status === 'playing' ? playback.pause : playback.play}>
+              {playback.status === 'playing' ? '일시정지' : playback.status === 'paused' ? '계속 재생' : '재생'}
+            </button>
+            <button type="button" onClick={playback.restart}>다시 시작</button>
+          </div>
+          <div className="speed-controls" role="group" aria-label="재생 속도">
+            {([0.5, 1, 2] as const).map(speed => <button key={speed} type="button" aria-label={`${speed}배속`} aria-pressed={playback.speed === speed} onClick={() => playback.setSpeed(speed)}>{speed}×</button>)}
+          </div>
+        </div>
+        <p className="playback-status" role="status">{playback.status === 'playing' ? '자동 재생 중' : playback.status === 'paused' ? '일시정지됨 · 계속 재생을 눌러 이어가세요' : playback.status === 'finished' ? '재생 완료' : '재생 대기'} · {playback.speed}배속</p>
       </div>
 
       <div className="graph-area">
         <div className="graph-toolbar"><span className="graph-caption">동일 입력 그래프</span><span className="current-caption"><i aria-hidden="true" />금색 테두리: 현재 간선</span></div>
-        <GraphView snapshot={snapshot} name={name} animateForward={animateForward} revision={revision} finalRun={isFinal ? run : undefined} weightRef={weight} />
+        <GraphView snapshot={snapshot} name={name} svgRef={svg} phase={playback.phase} target={target} />
         <div className="graph-legend" aria-label="간선 상태 범례">
           {statuses.map((status) => <span className="legend-item" key={status}><svg width="22" height="10" aria-hidden="true"><line x1="1" y1="5" x2="21" y2="5" stroke={EDGE_STYLES[status].color} strokeWidth={EDGE_STYLES[status].width} strokeDasharray={EDGE_STYLES[status].dash} /></svg>{EDGE_STYLES[status].label}</span>)}
         </div>
@@ -64,6 +75,7 @@ export function AlgorithmPanel({ run }: { run: MstRun }) {
           <div className="explanation-block"><h4><span className="explanation-dot" />무엇을 했나요?</h4><p>{snapshot.what}</p></div>
           <div className="explanation-block why-block"><h4><span className="explanation-dot" />왜 그런가요?</h4><p>{snapshot.why}</p></div>
           {isFinal && <p className="completion-label"><span aria-hidden="true">✓</span> <span>최종 MST 완성</span></p>}
+          {isFinal && <p className="final-announcement">MST 구성 완료 · 총 가중치 {run.totalWeight}</p>}
           {isKruskal && isFinal && <p className="termination-note" role="note" aria-label="종료 조건 안내">
             정점 {snapshot.components.flat().length}개를 연결하는 신장 트리에 필요한 간선 {snapshot.activeEdgeIds.length}개를 선택했습니다.
             {' '}따라서 MST가 완성되어 알고리즘을 종료합니다.
