@@ -12,7 +12,10 @@ export function AlgorithmLabSection({ runs }: { runs: readonly Result<MstRun>[] 
   const id = useId()
   useLayoutEffect(() => {
     const media = window.matchMedia?.(COMPACT_QUERY)
+    const print = window.matchMedia?.('print')
     const update = () => {
+      // Paged print width is not a user viewport resize; keep playback untouched.
+      if (print?.matches) return
       const focused = document.activeElement
       if (media?.matches) {
         const index = panels.current.findIndex(panel => panel?.contains(focused))
@@ -24,7 +27,8 @@ export function AlgorithmLabSection({ runs }: { runs: readonly Result<MstRun>[] 
       setCompact(media?.matches ?? false)
     }
     media?.addEventListener('change', update)
-    return () => media?.removeEventListener('change', update)
+    window.addEventListener('afterprint', update)
+    return () => { media?.removeEventListener('change', update); window.removeEventListener('afterprint', update) }
   }, [])
   const choose = (index: number) => { setSelected(index); tabs.current[index]?.focus() }
   return <section ref={root} aria-label="Algorithm Lab" className="lab-section" id="comparison" tabIndex={-1}>

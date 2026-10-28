@@ -11,7 +11,7 @@ function viewport(initial = true) {
     if (!entries.has(query)) { const events = new EventTarget(); entries.set(query, { matches: query.includes('max-width') ? compact : false, addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events), dispatchEvent: events.dispatchEvent.bind(events) }) }
     return entries.get(query)
   })
-  return (value: boolean) => { compact = value; const media = entries.get('(max-width: 1199px)')!; media.matches = value; act(() => { media.dispatchEvent(new Event('change')) }) }
+  return (value: boolean, printing = false) => { compact = value; const print = entries.get('print'); if (print) print.matches = printing; const media = entries.get('(max-width: 1199px)')!; media.matches = value; act(() => { media.dispatchEvent(new Event('change')) }) }
 }
 function scope(name = 'Kruskal') { return within(screen.getByRole('region', { name })) }
 function click(name: string, area = scope()) { fireEvent.click(area.getByRole('button', { name })) }
@@ -48,4 +48,13 @@ it('keeps focused desktop content visible on compact resize and moves focus off 
   resize(true); expect(screen.getByRole('tab', { name: 'Reverse-Delete' }).getAttribute('aria-selected')).toBe('true')
   screen.getByRole('tab', { name: 'Reverse-Delete' }).focus(); resize(false)
   expect(screen.getByRole('region', { name: 'Reverse-Delete' }).contains(document.activeElement)).toBe(true)
+})
+it('ignores print page-width media changes so printing cannot pause either desktop owner', () => {
+  const resize = viewport(false); render(<App />); finishIntro(); const right = scope('Reverse-Delete')
+  click('재생'); click('재생', right); const leftClock = clock(), rightClock = clock(right)
+  resize(true, true)
+  expect(leftClock.paused()).toBe(false); expect(rightClock.paused()).toBe(false)
+  expect(screen.getByRole('region', { name: 'Reverse-Delete' })).toBeDefined()
+  resize(false, false); window.dispatchEvent(new Event('afterprint'))
+  expect(clock(right)).toBe(rightClock); expect(rightClock.paused()).toBe(false)
 })
