@@ -53,3 +53,5 @@ Baseline verified: dev caea53518bfc5d6f2dfe73f3089ffa103a50392d, clean,0 behind/
 Gate A: four sections extracted with stable existing panel owners; new2tests RED→GREEN,225total PASS,build/lint PASS. Keyboard regression test now explicitly focuses Next after the new Hero navigation links; activation/state assertions retained.
 
 Gate B: one Hero-local real ScrollTrigger, no pin/scroll lock; small/reduced static fallback and read-only snapshot concept scenes.4new tests RED→GREEN including real trigger StrictMode/media cleanup and Lab isolation.229total PASS,build/lint/diff PASS.
+
+Gate C:1200px content-width threshold, stable mounted tabpanels, existing pause callback on hidden panels, roving focus and resize preservation.4new RED→GREEN tests;233total PASS,build/lint/diff PASS. Five existing motion matchMedia stubs now distinguish reduced-motion from viewport queries; their verification assertions remain unchanged.

@@ -10,7 +10,7 @@ import { reverseDelete } from '../algorithms/reverseDelete'
 import type { EdgeStatus } from '../algorithms/types'
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals() })
-function preference(reduced = false) { vi.stubGlobal('matchMedia', () => ({ matches: reduced, addEventListener() {}, removeEventListener() {} })) }
+function preference(reduced = false) { vi.stubGlobal('matchMedia', (query: string) => ({ matches: query.includes('prefers-reduced-motion') && reduced, addEventListener() {}, removeEventListener() {} })) }
 function panel(name = 'Kruskal') { return within(screen.getByRole('region', { name })) }
 function click(name: string, scope = panel()) { fireEvent.click(scope.getByRole('button', { name })) }
 function jump(index: number, scope = panel()) { fireEvent.change(scope.getByRole('combobox'), { target: { value: String(index) } }) }

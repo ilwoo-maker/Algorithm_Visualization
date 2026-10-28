@@ -9,7 +9,7 @@ import { ASSIGNMENT_GRAPH } from '../algorithms/fixtures'
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.restoreAllMocks() })
 function preference(reduced = false) {
-  vi.stubGlobal('matchMedia', () => ({ matches: reduced, addEventListener() {}, removeEventListener() {} }))
+  vi.stubGlobal('matchMedia', (query: string) => ({ matches: query.includes('prefers-reduced-motion') && reduced, addEventListener() {}, removeEventListener() {} }))
 }
 function panel(name = 'Kruskal') { return within(screen.getByRole('region', { name })) }
 function click(name: string, scope = panel()) { fireEvent.click(scope.getByRole('button', { name })) }

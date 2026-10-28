@@ -10,7 +10,7 @@ afterEach(() => { cleanup(); vi.unstubAllGlobals() })
 function preference(initial = false) {
   const events = new EventTarget()
   const media = { matches: initial, addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events) }
-  vi.stubGlobal('matchMedia', () => media)
+  vi.stubGlobal('matchMedia', (query: string) => query.includes('prefers-reduced-motion') ? media : { ...media, matches: false })
   return (matches: boolean) => { media.matches = matches; act(() => { events.dispatchEvent(new Event('change')) }) }
 }
 function scope(name = 'Kruskal') { return within(screen.getByRole('region', { name })) }

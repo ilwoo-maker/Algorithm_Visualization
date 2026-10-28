@@ -29,7 +29,7 @@ function installMotionPreference(initial = false) {
     addEventListener: events.addEventListener.bind(events),
     removeEventListener: events.removeEventListener.bind(events),
   }
-  vi.stubGlobal('matchMedia', () => media)
+  vi.stubGlobal('matchMedia', (query: string) => query.includes('prefers-reduced-motion') ? media : { ...media, matches: false })
   return {
     change(matches: boolean) {
       media.matches = matches

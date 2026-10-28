@@ -1,14 +1,15 @@
-import { useId, useRef } from 'react'
+import { useId, useLayoutEffect, useRef } from 'react'
 import type { EdgeStatus, MstRun } from '../algorithms/types'
 import { GraphView } from './GraphView'
 import { ACTION_NAMES, EDGE_STYLES } from './graphPresentation'
 import { useAlgorithmPlayback } from '../animation/useEdgeTransition'
 
-export function AlgorithmPanel({ run }: { run: MstRun }) {
+export function AlgorithmPanel({ run, visible = true }: { run: MstRun; visible?: boolean }) {
   const weight = useRef<HTMLOutputElement>(null)
   const svg = useRef<SVGSVGElement>(null)
   const notice = useRef<HTMLParagraphElement>(null)
   const playback = useAlgorithmPlayback(run, svg, weight, notice)
+  useLayoutEffect(() => { if (!visible) playback.pause() }, [visible, playback.status, playback.pause])
   const { index, snapshot, target } = playback
   const requestedIndex = target?.index ?? index
   const id = useId()

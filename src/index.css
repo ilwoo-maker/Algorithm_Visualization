@@ -247,3 +247,9 @@ h1 span { color: var(--teal); }
 .concept-grid h3 { font-size: 17px; }
 @media (max-width: 1199px) { .hero-section { grid-template-columns: 1fr; min-height: auto; } .hero-graph { max-width: 660px; width: 100%; justify-self: center; } }
 @media (max-width: 650px) { .concept-grid { grid-template-columns: 1fr; } .concept-section h2, .theory-section > h2 { font-size: 23px; } }
+.lab-panel { min-width: 0; }
+.lab-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.lab-tabs[hidden], .lab-panel[hidden] { display: none; }
+.lab-tabs button { flex: 1; min-width: 0; min-height: 44px; padding: 10px 12px; border-radius: 8px; border: 1px solid #b9c8d2; background: white; color: #415167; font-size: 13px; overflow-wrap: anywhere; }
+.lab-tabs button[aria-selected="true"] { border-color: #126c62; background: #eef8f5; color: #126c62; font-weight: 700; }
+@media (max-width: 1199px) { .comparison-grid { grid-template-columns: 1fr; } }
