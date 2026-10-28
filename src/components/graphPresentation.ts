@@ -1,5 +1,8 @@
 import type { Action, EdgeStatus } from '../algorithms/types'
 
+// Keep readable interiors independent of inspection/bloom stroke colors.
+export const VERTEX_STYLE = { fill: '#213e53', label: '#eef8ff', stroke: '#a4bdce' } as const
+
 // Presentation only: both panels share this fixed, non-crossing layout.
 export const VERTEX_POSITIONS: Record<string, { x: number; y: number }> = {
   A: { x: 78, y: 65 }, B: { x: 250, y: 165 }, C: { x: 78, y: 275 },

@@ -1,12 +1,12 @@
 import { gsap } from 'gsap'
 
 /** One local scene with identical completion/cancellation restoration semantics. */
-export function scopedTimeline(scope: Element, build: (timeline: gsap.core.Timeline) => void, onComplete: () => void, startPaused = false) {
+export function scopedTimeline(scope: Element, build: (timeline: gsap.core.Timeline) => void, onComplete: () => void, startPaused = false, additionalElements: readonly Element[] = []) {
   let settled = false
   let timeline!: gsap.core.Timeline
   // Later-initialized overlapping tweens may capture another tween's inline state.
   // Preserve the owner's original presentation independently of GSAP's lazy capture.
-  const originals = [scope, ...scope.querySelectorAll('*')].map(element => ({
+  const originals = [scope, ...scope.querySelectorAll('*'), ...additionalElements].map(element => ({
     element, style: element.getAttribute('style'), transform: element.getAttribute('transform'), origin: element.getAttribute('data-svg-origin'),
   }))
   const restorePresentation = () => {

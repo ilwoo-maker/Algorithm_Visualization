@@ -1,6 +1,6 @@
 import type { RefObject } from 'react'
 import type { EdgeSnapshot, MstRun } from '../algorithms/types'
-import { EDGE_STYLES } from '../components/graphPresentation'
+import { EDGE_STYLES, VERTEX_STYLE } from '../components/graphPresentation'
 import { scopedTimeline, svgLineLength } from './scopedTimeline'
 import { PLAYBACK_TIMING } from './playbackTiming'
 import type { TransitionPhase } from './playbackTiming'
@@ -8,12 +8,14 @@ import type { TransitionPhase } from './playbackTiming'
 export interface TransitionLifecycle {
   onCommit?: () => void
   onPhase?: (phase: TransitionPhase) => void
+  onVisualComplete?: () => void
   readingSeconds?: number
 }
 
 export interface CompletionScene {
   run: MstRun
   weightRef?: RefObject<HTMLOutputElement | null>
+  noticeRef?: RefObject<HTMLParagraphElement | null>
 }
 
 function pulse(timeline: gsap.core.Timeline, svg: SVGSVGElement, vertices: readonly string[], color: string, start: number) {
@@ -22,6 +24,7 @@ function pulse(timeline: gsap.core.Timeline, svg: SVGSVGElement, vertices: reado
     const wave = vertex.querySelector('.vertex-wave')!
     const circle = vertex.querySelector('.vertex-circle')!
     timeline.fromTo(wave, { attr: { r: 23 }, opacity: 0.8, stroke: color }, { attr: { r: 37 }, opacity: 0, duration: 0.35, immediateRender: false }, start)
+      .set(circle, { fill: VERTEX_STYLE.fill }, start)
       .to(circle, { stroke: color, strokeWidth: 3.5, duration: 0.15 }, start)
   }
 }
@@ -46,24 +49,28 @@ function inspection(timeline: gsap.core.Timeline, base: SVGLineElement, effect: 
   }
 }
 
-function completion(timeline: gsap.core.Timeline, svg: SVGSVGElement, scene: CompletionScene) {
+function completion(timeline: gsap.core.Timeline, svg: SVGSVGElement, scene: CompletionScene, onAnnounce: () => void) {
   const start = timeline.duration()
   timeline.addLabel('completion', start)
   const groups = [...svg.querySelectorAll<SVGGElement>('g[data-edge-id]')]
-  scene.run.mst.forEach((edge, index) => {
+  scene.run.mst.forEach((edge) => {
     const group = groups.find(item => item.getAttribute('data-edge-id') === edge.id)
     const base = group?.querySelector('.graph-edge')
     const effect = group?.querySelector('.edge-effect')
     if (!base || !effect) return
-    const final = scene.run.snapshots.at(-1)!.edges.find(item => item.id === edge.id)!
-    timeline.fromTo(effect, { opacity: 0, stroke: EDGE_STYLES[final.status].color, strokeWidth: 8, strokeDasharray: 'none' }, { opacity: 0.95, duration: 0.14, immediateRender: false }, start + index * 0.09)
-      .to(effect, { opacity: 0, duration: 0.35 }, start + index * 0.09 + 0.14)
+    timeline.fromTo(effect, { opacity: 0, stroke: '#34e4b8', strokeWidth: 8, strokeDasharray: 'none' }, { opacity: 0.95, duration: 0.16, immediateRender: false }, start)
+      .to(effect, { opacity: 0, duration: PLAYBACK_TIMING.bloom - 0.16 }, start + 0.16)
   })
   const vertices = [...svg.querySelectorAll('.vertex')].map(vertex => vertex.getAttribute('data-vertex')!)
-  pulse(timeline, svg, vertices, '#34e4b8', start + 0.2)
+  pulse(timeline, svg, vertices, '#34e4b8', start + 0.05)
   const weight = scene.weightRef?.current
   if (weight) timeline.fromTo(weight, { scale: 1, transformOrigin: 'left center' }, { scale: 1.18, duration: 0.18, immediateRender: false }, start + 0.2)
     .to(weight, { scale: 1, duration: 0.3 }, start + 0.38)
+  const announcement = start + PLAYBACK_TIMING.bloom
+  timeline.addLabel('announcement', announcement).call(onAnnounce, [], 'announcement')
+  const notice = scene.noticeRef?.current
+  if (notice) timeline.fromTo(notice, { opacity: 0, scale: 0.96, transformOrigin: 'center' },
+    { opacity: 1, scale: 1, duration: PLAYBACK_TIMING.announcement, immediateRender: false }, 'announcement')
 }
 
 /** Snapshot attributes define the settled state; every temporary scene mutation is reverted. */
@@ -134,12 +141,19 @@ export function createEdgeTransition(
     timeline.set(effect, { opacity: 1, stroke: target.color, strokeWidth: target.width, strokeDasharray: target.dash ?? 'none', strokeDashoffset: 0, x: 0 }, 'settle')
       .to(effect, { duration: PLAYBACK_TIMING.commit - PLAYBACK_TIMING.settle, opacity: 1 }, 'settle')
       .call(() => lifecycle.onCommit?.(), [], 'commit')
+    if (to.status === 'kept') {
+      // Width-only snap: neither the edge endpoints nor its scale can move.
+      timeline.addLabel('restoreSnap', PLAYBACK_TIMING.settle)
+        .to(effect, { strokeWidth: target.width * 1.2, autoRound: false, duration: PLAYBACK_TIMING.restoreSnap * 0.4 }, 'restoreSnap')
+        .to(effect, { strokeWidth: target.width, autoRound: false, duration: PLAYBACK_TIMING.restoreSnap * 0.6 }, PLAYBACK_TIMING.settle + PLAYBACK_TIMING.restoreSnap * 0.4)
+    }
     if (finalScene && base.ownerSVGElement) {
       timeline.call(() => lifecycle.onPhase?.('completion'), [], 'commit')
-      completion(timeline, base.ownerSVGElement, finalScene)
+      completion(timeline, base.ownerSVGElement, finalScene, () => lifecycle.onPhase?.('announcement'))
     }
+    timeline.addLabel('visualComplete', timeline.duration()).call(() => lifecycle.onVisualComplete?.(), [], 'visualComplete')
     timeline.addLabel('reading', timeline.duration())
     if (lifecycle.readingSeconds) timeline.call(() => lifecycle.onPhase?.('reading'), [], 'reading')
       .to({}, { duration: lifecycle.readingSeconds })
-  }, onComplete)
+  }, onComplete, false, [finalScene?.weightRef?.current, finalScene?.noticeRef?.current].filter(element => element != null))
 }

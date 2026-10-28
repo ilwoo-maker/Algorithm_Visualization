@@ -107,7 +107,7 @@ it.each([0.5, 1, 2])('applies %sx to the existing timeline including its reading
   const motion = scene(); click('일시정지')
   click(`${speed}배속`)
   expect(scene()).toBe(motion); expect(motion.timeScale()).toBe(speed); expect(motion.paused()).toBe(true)
-  expect(motion.duration() - motion.labels.reading).toBeCloseTo(1.3)
+  expect(motion.duration() - motion.labels.reading).toBeCloseTo(0.7)
   click('계속 재생'); act(() => { motion.time(motion.labels.reading + 0.2) }); click('일시정지')
   expect(index()).toBe('1'); expect(motion.paused()).toBe(true)
   const position = motion.time(); click('계속 재생')

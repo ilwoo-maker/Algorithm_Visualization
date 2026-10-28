@@ -71,10 +71,10 @@ h1 span { color: var(--teal); }
 .weight-badge { fill: #1e384e; stroke: #68849a; stroke-width: 1; }
 .weight-badge.is-current { fill: #54401d; stroke: #ffcc67; stroke-width: 1.5; }
 .weight-text { font-size: 16px; font-weight: 700; fill: #ecf6ff; font-variant-numeric: tabular-nums; }
-.vertex .vertex-circle { fill: #213e53; stroke: #a4bdce; stroke-width: 2; }
+.vertex .vertex-circle { stroke-width: 2; }
 .vertex .vertex-wave, .vertex .component-boundary { fill: none; stroke-width: 2; }
 .vertex .component-boundary { stroke-dasharray: 3 4; }
-.vertex text { fill: #eef8ff; font-size: 15px; font-weight: 700; }
+.vertex text { font-size: 15px; font-weight: 700; }
 .graph-legend { padding: 0 18px 16px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 16px; }
 .legend-item { display: inline-flex; align-items: center; gap: 5px; color: #c2d5e4; font-size: 11px; }
 .panel-playback { padding: 16px 26px; border-bottom: 1px solid var(--border); }
@@ -104,7 +104,8 @@ h1 span { color: var(--teal); }
 .playback-controls .play-button, .speed-controls button[aria-pressed="true"] { background: var(--panel-tint); color: var(--panel-accent); border-color: var(--panel-accent); }
 .speed-controls button { min-width: 44px; padding-inline: 8px; }
 .playback-status { margin: 9px 0 0; font-size: 12px; color: #536176; line-height: 1.7; overflow-wrap: anywhere; }
-.final-announcement { font-size: 12px; color: #087363; font-weight: 600; }
+.completion-card { margin: 0 18px 12px; padding: 11px 12px; border: 1px solid #39776b; border-radius: 8px; background: #173d3b; color: #d8fff2; font-size: 12px; font-weight: 600; line-height: 1.7; text-align: center; overflow-wrap: anywhere; }
+.completion-card[hidden] { display: none; }
 .explanation-block { margin-bottom: 15px; }
 .explanation-block h4 { font-size: 11px; font-weight: 700; margin: 0 0 7px; display: flex; align-items: center; gap: 7px; }
 .explanation-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--panel-accent); }

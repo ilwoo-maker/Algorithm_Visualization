@@ -19,7 +19,7 @@ interface Presentation {
 }
 
 /** One presentation/clock owner per panel. Algorithm records are only read. */
-export function useAlgorithmPlayback(run: MstRun, svg: RefObject<SVGSVGElement | null>, weightRef: RefObject<HTMLOutputElement | null>) {
+export function useAlgorithmPlayback(run: MstRun, svg: RefObject<SVGSVGElement | null>, weightRef: RefObject<HTMLOutputElement | null>, noticeRef?: RefObject<HTMLParagraphElement | null>) {
   const [view, setView] = useState<Presentation>({ index: 0, targetIndex: null, revision: 0, phase: 'idle', status: 'idle', speed: 1 })
   const state = useRef(view)
   const owner = useRef<Scene | null>(null)
@@ -90,7 +90,10 @@ export function useAlgorithmPlayback(run: MstRun, svg: RefObject<SVGSVGElement |
     if (!root) return
     const token = ++generation.current
     const valid = () => token === generation.current
-    const phase = (value: TransitionPhase) => { if (valid()) publish({ phase: value }) }
+    const phase = (value: TransitionPhase) => { if (valid()) {
+      if (value === 'announcement') flushSync(() => publish({ phase: value }))
+      else publish({ phase: value })
+    } }
     const target = state.current.targetIndex
     const finish = () => {
       if (!valid()) return
@@ -122,11 +125,12 @@ export function useAlgorithmPlayback(run: MstRun, svg: RefObject<SVGSVGElement |
         } else publish({ index: target, targetIndex: null, phase: 'idle', status: target === last ? 'finished' : 'idle' })
       } else owner.current = createEdgeTransition(group.querySelector('.graph-edge')!, group.querySelector('.edge-effect')!, from, to,
         finish,
-        target === last ? { run, weightRef } : undefined,
+        target === last ? { run, weightRef, noticeRef } : undefined,
         { onPhase: phase, onCommit: () => { if (valid()) {
           flushSync(() => publish({ index: target }))
           owner.current?.restorePresentation()
         } },
+          onVisualComplete: () => { if (valid()) owner.current?.restorePresentation() },
           readingSeconds: state.current.status === 'playing' ? PLAYBACK_TIMING.reading : 0 })
       owner.current?.timeline.timeScale(state.current.speed)
       if (state.current.status === 'paused' || (document.hidden && state.current.status === 'playing')) {
@@ -136,7 +140,7 @@ export function useAlgorithmPlayback(run: MstRun, svg: RefObject<SVGSVGElement |
     }
     return cancel
     // A revision is a new user/sequence request. Commit/phase updates keep the same owner.
-  }, [view.revision, run, svg, weightRef, last, cancel, publish])
+  }, [view.revision, run, svg, weightRef, noticeRef, last, cancel, publish])
 
   useLayoutEffect(() => {
     const media = typeof window.matchMedia === 'function' ? window.matchMedia('(prefers-reduced-motion: reduce)') : null

@@ -7,7 +7,8 @@ import { useAlgorithmPlayback } from '../animation/useEdgeTransition'
 export function AlgorithmPanel({ run }: { run: MstRun }) {
   const weight = useRef<HTMLOutputElement>(null)
   const svg = useRef<SVGSVGElement>(null)
-  const playback = useAlgorithmPlayback(run, svg, weight)
+  const notice = useRef<HTMLParagraphElement>(null)
+  const playback = useAlgorithmPlayback(run, svg, weight, notice)
   const { index, snapshot, target } = playback
   const requestedIndex = target?.index ?? index
   const id = useId()
@@ -63,8 +64,8 @@ export function AlgorithmPanel({ run }: { run: MstRun }) {
       </div>
 
       <div className="graph-area">
-        <div className="graph-toolbar"><span className="graph-caption">동일 입력 그래프</span><span className="current-caption"><i aria-hidden="true" />금색 테두리: 현재 간선</span></div>
-        <GraphView snapshot={snapshot} name={name} svgRef={svg} phase={playback.phase} target={target} />
+        <div className="graph-toolbar"><span className="graph-caption">동일 입력 그래프</span><span className="current-caption">{isFinal ? '최종 MST · 검사 강조 종료' : <><i aria-hidden="true" />금색 테두리: 현재 간선</>}</span></div>
+        <GraphView snapshot={snapshot} name={name} svgRef={svg} phase={playback.phase} target={target} final={isFinal} finalWeight={run.totalWeight} noticeRef={notice} />
         <div className="graph-legend" aria-label="간선 상태 범례">
           {statuses.map((status) => <span className="legend-item" key={status}><svg width="22" height="10" aria-hidden="true"><line x1="1" y1="5" x2="21" y2="5" stroke={EDGE_STYLES[status].color} strokeWidth={EDGE_STYLES[status].width} strokeDasharray={EDGE_STYLES[status].dash} /></svg>{EDGE_STYLES[status].label}</span>)}
         </div>
@@ -75,7 +76,6 @@ export function AlgorithmPanel({ run }: { run: MstRun }) {
           <div className="explanation-block"><h4><span className="explanation-dot" />무엇을 했나요?</h4><p>{snapshot.what}</p></div>
           <div className="explanation-block why-block"><h4><span className="explanation-dot" />왜 그런가요?</h4><p>{snapshot.why}</p></div>
           {isFinal && <p className="completion-label"><span aria-hidden="true">✓</span> <span>최종 MST 완성</span></p>}
-          {isFinal && <p className="final-announcement">MST 구성 완료 · 총 가중치 {run.totalWeight}</p>}
           {isKruskal && isFinal && <p className="termination-note" role="note" aria-label="종료 조건 안내">
             정점 {snapshot.components.flat().length}개를 연결하는 신장 트리에 필요한 간선 {snapshot.activeEdgeIds.length}개를 선택했습니다.
             {' '}따라서 MST가 완성되어 알고리즘을 종료합니다.
