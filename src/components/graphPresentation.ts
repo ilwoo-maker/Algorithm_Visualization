@@ -13,13 +13,13 @@ export const WEIGHT_POSITIONS: Record<string, { x: number; y: number }> = {
 }
 
 export const EDGE_STYLES: Record<EdgeStatus, { label: string; color: string; dash?: string; width: number }> = {
-  pending: { label: '미검사', color: '#758398', dash: '7 5', width: 2 },
-  selected: { label: '선택', color: '#087f70', width: 4 },
-  rejected: { label: '사이클 기각', color: '#b04460', dash: '7 4', width: 2.5 },
-  present: { label: '남아 있음', color: '#65758b', width: 2.5 },
-  'temporarily-removed': { label: '임시 제거', color: '#a35b06', dash: '10 4 2 4', width: 3 },
-  removed: { label: '삭제 확정', color: '#8390a1', dash: '2 6', width: 2 },
-  kept: { label: '복구·유지', color: '#315bb5', width: 4 },
+  pending: { label: '미검사', color: '#8fa5b8', dash: '7 5', width: 2 },
+  selected: { label: '선택', color: '#34e4b8', width: 4 },
+  rejected: { label: '사이클 기각', color: '#ff748e', dash: '7 4', width: 2.5 },
+  present: { label: '남아 있음', color: '#8fa5b8', width: 2.5 },
+  'temporarily-removed': { label: '임시 제거', color: '#ffcc67', dash: '10 4 2 4', width: 3 },
+  removed: { label: '삭제 확정', color: '#708699', dash: '2 6', width: 2 },
+  kept: { label: '복구·유지', color: '#65aaff', width: 4 },
 }
 
 export const ACTION_NAMES: Record<Action, string> = {

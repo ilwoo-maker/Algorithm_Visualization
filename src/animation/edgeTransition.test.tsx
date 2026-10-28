@@ -56,11 +56,11 @@ function makeLines(color: string, dash: string | null) {
 
 describe('real GSAP edge transitions (DOM lifecycle, not browser painting)', () => {
   it.each([
-    ['Kruskal accept', k, 1, '#087f70', null, [8, 127, 112]],
-    ['Kruskal reject', k, 4, '#b04460', '7 4', [176, 68, 96]],
-    ['Reverse-Delete try-remove', r, 1, '#a35b06', '10 4 2 4', [163, 91, 6]],
-    ['Reverse-Delete remove', r, 2, '#8390a1', '2 6', [163, 91, 6]],
-    ['Reverse-Delete restore', r, 6, '#315bb5', null, [49, 91, 181]],
+    ['Kruskal accept', k, 1, '#34e4b8', null, [52, 228, 184]],
+    ['Kruskal reject', k, 4, '#ff748e', '7 4', [255, 116, 142]],
+    ['Reverse-Delete try-remove', r, 1, '#ffcc67', '10 4 2 4', [255, 204, 103]],
+    ['Reverse-Delete remove', r, 2, '#708699', '2 6', [255, 204, 103]],
+    ['Reverse-Delete restore', r, 6, '#65aaff', null, [101, 170, 255]],
   ] as const)('%s animates a decorative edge and restores exact snapshot attributes on completion', (_name, run, index, color, dash, effectColor) => {
     const target = run.snapshots[index]
     const to = target.edges.find((edge) => edge.id === target.edgeId)!
@@ -68,7 +68,7 @@ describe('real GSAP edge transitions (DOM lifecycle, not browser painting)', () 
     const { svg, base, effect } = makeLines(color, dash)
     let completed = 0
     const animation = createEdgeTransition(base, effect, from, to, () => { completed++ })
-    animation.timeline.pause().progress(0.5)
+    animation.timeline.pause().time(animation.timeline.labels.decision + 0.25)
     expect(gsap.utils.splitColor(effect.style.stroke)).toEqual(effectColor)
     if (to.status === 'selected') {
       expect(Number.parseFloat(effect.style.strokeDashoffset)).toBeGreaterThan(0)
@@ -114,7 +114,13 @@ function panel(name: string) {
   return within(screen.getByRole('region', { name }))
 }
 function currentEffect(scope: ReturnType<typeof within>) {
-  return scope.getByRole('img').querySelector('.edge-effect')!
+  return scope.getByRole('img').querySelector('g[aria-current="true"] .edge-effect')!
+}
+function finishEntrances() {
+  for (const svg of screen.getAllByRole('img')) {
+    const tween = gsap.getTweensOf(svg.querySelector('.vertex')!)[0]
+    if (tween) act(() => { (tween.parent as gsap.core.Timeline).progress(1) })
+  }
 }
 function ownedTimeline(effect: Element) {
   const tween = gsap.getTweensOf(effect)[0]
@@ -126,6 +132,7 @@ describe('snapshot navigation and effect ownership', () => {
   it('only animates Next; an adjacent dropdown choice, backward step and reset are immediate', () => {
     installMotionPreference()
     render(<App />)
+    finishEntrances()
     const scope = panel('Kruskal')
     expect(scope.getByRole('img').getAttribute('aria-busy')).toBe('false')
     fireEvent.change(scope.getByRole('combobox'), { target: { value: '1' } })
@@ -146,6 +153,7 @@ describe('snapshot navigation and effect ownership', () => {
   it('cancels rapid forward effects and leaves a direct jump at its exact snapshot', () => {
     installMotionPreference()
     render(<App />)
+    finishEntrances()
     const scope = panel('Kruskal')
     fireEvent.click(scope.getByRole('button', { name: '다음' }))
     const first = ownedTimeline(currentEffect(scope))
@@ -164,6 +172,7 @@ describe('snapshot navigation and effect ownership', () => {
   it('finishes one panel without cancelling the other and removes all transient styles', () => {
     installMotionPreference()
     render(<App />)
+    finishEntrances()
     const left = panel('Kruskal'), right = panel('Reverse-Delete')
     fireEvent.click(left.getByRole('button', { name: '다음' }))
     fireEvent.click(right.getByRole('button', { name: '다음' }))
@@ -181,6 +190,7 @@ describe('snapshot navigation and effect ownership', () => {
   it('keeps Reverse-Delete temporary weight 7, restored weight 11 and final weight 8', () => {
     installMotionPreference()
     render(<App />)
+    finishEntrances()
     const scope = panel('Reverse-Delete')
     fireEvent.change(scope.getByRole('combobox'), { target: { value: '4' } })
     fireEvent.click(scope.getByRole('button', { name: '다음' }))
@@ -207,6 +217,7 @@ describe('snapshot navigation and effect ownership', () => {
   it('cancels an active effect when reduced motion is enabled at runtime', () => {
     const preference = installMotionPreference()
     render(<App />)
+    finishEntrances()
     const scope = panel('Kruskal')
     fireEvent.click(scope.getByRole('button', { name: '다음' }))
     const animation = ownedTimeline(currentEffect(scope))
@@ -219,6 +230,7 @@ describe('snapshot navigation and effect ownership', () => {
   it('cleans up its owned effects on unmount under StrictMode', () => {
     installMotionPreference()
     const view = render(<StrictMode><App /></StrictMode>)
+    finishEntrances()
     const scope = panel('Kruskal')
     fireEvent.click(scope.getByRole('button', { name: '다음' }))
     const effect = currentEffect(scope)

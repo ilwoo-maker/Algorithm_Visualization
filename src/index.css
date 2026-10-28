@@ -55,23 +55,28 @@ h1 span { color: var(--teal); }
 .panel-title-row h3 { font-size: 22px; font-weight: 650; line-height: 1.3; letter-spacing: -.7px; margin: 0; }
 .approach-tag { color: var(--panel-accent); background: var(--panel-tint); border: 1px solid color-mix(in srgb, var(--panel-accent) 14%, white); font-size: 10px; padding: 4px 8px; border-radius: 5px; margin-left: auto; }
 .panel-header > p { margin: 10px 0 0 36px; font-size: 11px; color: var(--muted); }
-.graph-area { background-color: #fbfcfd; background-image: radial-gradient(#d3dce6 0.65px, transparent 0.65px); background-size: 18px 18px; border-bottom: 1px solid var(--border); }
+.graph-area { background-color: #142638; background-image: radial-gradient(#36516a 0.65px, transparent 0.65px); background-size: 18px 18px; border-bottom: 1px solid #29465d; color: #e5eff6; }
 .graph-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 24px 0; }
-.graph-caption { font-size: 11px; font-weight: 600; color: #536176; }
-.current-caption { font-size: 11px; color: #536176; display: flex; gap: 5px; align-items: center; }
-.current-caption i { width: 8px; height: 8px; border: 2px solid #d19b27; border-radius: 3px; background: #fff5d6; }
+.graph-caption { font-size: 11px; font-weight: 600; color: #c2d5e4; }
+.current-caption { font-size: 11px; color: #c2d5e4; display: flex; gap: 5px; align-items: center; }
+.current-caption i { width: 8px; height: 8px; border: 2px solid #ffcc67; border-radius: 3px; background: #54401d; }
 .graph-svg { width: 100%; height: auto; display: block; max-height: 350px; }
 .graph-svg line { stroke-linecap: round; }
-.motion-status { margin: 0; padding: 8px 24px 0; min-height: 25px; color: #536176; font-size: 11px; line-height: 1.6; }
-.edge-effect { pointer-events: none; }
-.current-edge-halo { stroke: #efca6c; stroke-width: 11; opacity: .5; }
-.weight-badge { fill: #fff; stroke: #e0e5eb; stroke-width: 1; }
-.weight-badge.is-current { fill: #fff2c9; stroke: #b77d13; stroke-width: 1.5; }
-.weight-text { font-size: 16px; font-weight: 700; fill: #26384a; font-variant-numeric: tabular-nums; }
-.vertex circle { fill: #fff; stroke: #3d5167; stroke-width: 2; }
-.vertex text { fill: #263b50; font-size: 15px; font-weight: 700; }
+.motion-status { margin: 0; padding: 8px 24px 0; min-height: 25px; color: #c2d5e4; font-size: 11px; line-height: 1.6; }
+.edge-effect, .edge-streak, .edge-streak-glow, .light-head, .vertex-wave, .stage-flash, .component-boundary { pointer-events: none; }
+.edge-streak-glow { stroke-opacity: .25; filter: drop-shadow(0 0 3px #ffdf90); }
+.light-head { filter: drop-shadow(0 0 3px #fff4cc); }
+.stage-note { margin: 0; padding: 0 18px 12px; font-size: 11px; line-height: 1.7; color: #bed1e0; text-align: center; word-break: keep-all; }
+.current-edge-halo { stroke: #ffcc67; stroke-width: 12; opacity: .22; }
+.weight-badge { fill: #1e384e; stroke: #68849a; stroke-width: 1; }
+.weight-badge.is-current { fill: #54401d; stroke: #ffcc67; stroke-width: 1.5; }
+.weight-text { font-size: 16px; font-weight: 700; fill: #ecf6ff; font-variant-numeric: tabular-nums; }
+.vertex .vertex-circle { fill: #213e53; stroke: #a4bdce; stroke-width: 2; }
+.vertex .vertex-wave, .vertex .component-boundary { fill: none; stroke-width: 2; }
+.vertex .component-boundary { stroke-dasharray: 3 4; }
+.vertex text { fill: #eef8ff; font-size: 15px; font-weight: 700; }
 .graph-legend { padding: 0 18px 16px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 16px; }
-.legend-item { display: inline-flex; align-items: center; gap: 5px; color: #47566b; font-size: 11px; }
+.legend-item { display: inline-flex; align-items: center; gap: 5px; color: #c2d5e4; font-size: 11px; }
 .panel-playback { padding: 16px 26px; border-bottom: 1px solid var(--border); }
 .panel-content { padding: 18px 26px 16px; }
 .step-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
@@ -211,4 +216,8 @@ h1 span { color: var(--teal); }
   .approach-tag { margin-left: 33px; }
   .metrics { gap: 6px; }
   .brand { gap: 9px; font-size: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .edge-effect, .edge-streak, .edge-streak-glow, .light-head, .vertex-wave, .stage-flash { display: none; }
 }

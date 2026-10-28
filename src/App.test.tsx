@@ -185,13 +185,13 @@ describe('independent snapshot playback', () => {
     const user = userEvent.setup()
     render(<App />)
     const cases = [
-      ['Kruskal', '0', 'BE', '미검사', '#758398', '7 5', '2'],
-      ['Kruskal', '4', 'AB', '선택', '#087f70', null, '4'],
-      ['Kruskal', '4', 'AC', '사이클 기각', '#b04460', '7 4', '2.5'],
-      ['Reverse-Delete', '0', 'BE', '남아 있음', '#65758b', null, '2.5'],
-      ['Reverse-Delete', '5', 'BE', '임시 제거', '#a35b06', '10 4 2 4', '3'],
-      ['Reverse-Delete', '5', 'DE', '삭제 확정', '#8390a1', '2 6', '2'],
-      ['Reverse-Delete', '6', 'BE', '복구·유지', '#315bb5', null, '4'],
+      ['Kruskal', '0', 'BE', '미검사', '#8fa5b8', '7 5', '2'],
+      ['Kruskal', '4', 'AB', '선택', '#34e4b8', null, '4'],
+      ['Kruskal', '4', 'AC', '사이클 기각', '#ff748e', '7 4', '2.5'],
+      ['Reverse-Delete', '0', 'BE', '남아 있음', '#8fa5b8', null, '2.5'],
+      ['Reverse-Delete', '5', 'BE', '임시 제거', '#ffcc67', '10 4 2 4', '3'],
+      ['Reverse-Delete', '5', 'DE', '삭제 확정', '#708699', '2 6', '2'],
+      ['Reverse-Delete', '6', 'BE', '복구·유지', '#65aaff', null, '4'],
     ] as const
     for (const [algorithm, step, edge, status, color, dash, width] of cases) {
       const panel = within(screen.getByRole('region', { name: algorithm }))

@@ -1,11 +1,15 @@
-import { useId, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import type { EdgeStatus, MstRun } from '../algorithms/types'
 import { GraphView } from './GraphView'
 import { ACTION_NAMES, EDGE_STYLES } from './graphPresentation'
 
 export function AlgorithmPanel({ run }: { run: MstRun }) {
-  const [index, setIndex] = useState(0)
-  const [animateForward, setAnimateForward] = useState(false)
+  const [navigation, setNavigation] = useState({ index: 0, animateForward: false, revision: 0 })
+  const { index, animateForward, revision } = navigation
+  const weight = useRef<HTMLOutputElement>(null)
+  const navigate = (target: number | ((index: number) => number), motion = false) => {
+    setNavigation(previous => ({ index: typeof target === 'number' ? target : target(previous.index), animateForward: motion, revision: previous.revision + 1 }))
+  }
   const id = useId()
   const snapshot = run.snapshots[index]
   const isKruskal = run.algorithm === 'kruskal'
@@ -31,11 +35,14 @@ export function AlgorithmPanel({ run }: { run: MstRun }) {
 
         <div className="step-controls">
           <div className="step-buttons">
-            <button type="button" onClick={() => { setAnimateForward(false); setIndex(0) }} disabled={index === 0}><span aria-hidden="true">↤</span> 처음으로</button>
-            <button type="button" onClick={() => { setAnimateForward(false); setIndex((value) => Math.max(0, value - 1)) }} disabled={index === 0}><span aria-hidden="true">←</span> 이전</button>
-            <button className="next-button" type="button" onClick={() => { setAnimateForward(true); setIndex((value) => Math.min(lastIndex, value + 1)) }} disabled={isFinal}>다음 <span aria-hidden="true">→</span></button>
+            <button type="button" onClick={() => navigate(0)} disabled={index === 0}><span aria-hidden="true">↤</span> 처음으로</button>
+            <button type="button" onClick={() => navigate(value => Math.max(0, value - 1))} disabled={index === 0}><span aria-hidden="true">←</span> 이전</button>
+            <button className="next-button" type="button" onClick={() => navigate(value => Math.min(lastIndex, value + 1), true)} disabled={isFinal}>다음 <span aria-hidden="true">→</span></button>
           </div>
-          <div className="step-select"><label htmlFor={`${id}-step`}>단계 선택</label><select id={`${id}-step`} value={index} onChange={(event) => { setAnimateForward(false); setIndex(Number(event.target.value)) }}>
+          <div className="step-select"><label htmlFor={`${id}-step`}>단계 선택</label><select id={`${id}-step`} value={index}
+            onPointerDown={() => navigate(index)}
+            onKeyDown={(event) => { if ([' ', 'Enter', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) navigate(index) }}
+            onChange={(event) => navigate(Number(event.target.value))}>
             {run.snapshots.map((step) => {
               const edge = step.edges.find((candidate) => candidate.id === step.edgeId)
               return <option value={step.index} key={step.index}>{String(step.index).padStart(2, '0')} · {edge ? `${edge.name} ` : ''}{ACTION_NAMES[step.action]}</option>
@@ -46,7 +53,7 @@ export function AlgorithmPanel({ run }: { run: MstRun }) {
 
       <div className="graph-area">
         <div className="graph-toolbar"><span className="graph-caption">동일 입력 그래프</span><span className="current-caption"><i aria-hidden="true" />금색 테두리: 현재 간선</span></div>
-        <GraphView snapshot={snapshot} name={name} animateForward={animateForward} />
+        <GraphView snapshot={snapshot} name={name} animateForward={animateForward} revision={revision} finalRun={isFinal ? run : undefined} weightRef={weight} />
         <div className="graph-legend" aria-label="간선 상태 범례">
           {statuses.map((status) => <span className="legend-item" key={status}><svg width="22" height="10" aria-hidden="true"><line x1="1" y1="5" x2="21" y2="5" stroke={EDGE_STYLES[status].color} strokeWidth={EDGE_STYLES[status].width} strokeDasharray={EDGE_STYLES[status].dash} /></svg>{EDGE_STYLES[status].label}</span>)}
         </div>
@@ -66,7 +73,7 @@ export function AlgorithmPanel({ run }: { run: MstRun }) {
         </div>
 
         <div className="metrics">
-          <div className="metric"><span>현재 활성 간선 가중치 합</span><output aria-label="현재 활성 간선 가중치 합">{snapshot.totalWeight}</output><small>{isFinal ? '최종 MST 가중치' : '현재 단계 기준'}</small></div>
+          <div className="metric"><span>현재 활성 간선 가중치 합</span><output ref={weight} aria-label="현재 활성 간선 가중치 합">{snapshot.totalWeight}</output><small>{isFinal ? '최종 MST 가중치' : '현재 단계 기준'}</small></div>
           <div className="metric"><span>현재 활성 간선 수</span><output aria-label="현재 활성 간선 수">{snapshot.activeEdgeIds.length}</output><small>전체 {snapshot.edges.length}개 중</small></div>
           <div className="metric"><span>연결 요소</span><strong>{snapshot.components.length}</strong><small>{snapshot.components.length === 1 ? '모든 정점 연결됨' : '분리된 정점 집합'}</small></div>
         </div>
