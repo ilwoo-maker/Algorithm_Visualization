@@ -62,6 +62,8 @@ h1 span { color: var(--teal); }
 .current-caption i { width: 8px; height: 8px; border: 2px solid #d19b27; border-radius: 3px; background: #fff5d6; }
 .graph-svg { width: 100%; height: auto; display: block; max-height: 350px; }
 .graph-svg line { stroke-linecap: round; }
+.motion-status { margin: 0; padding: 8px 24px 0; min-height: 25px; color: #536176; font-size: 11px; line-height: 1.6; }
+.edge-effect { pointer-events: none; }
 .current-edge-halo { stroke: #efca6c; stroke-width: 11; opacity: .5; }
 .weight-badge { fill: #fff; stroke: #e0e5eb; stroke-width: 1; }
 .weight-badge.is-current { fill: #fff2c9; stroke: #b77d13; stroke-width: 1.5; }
