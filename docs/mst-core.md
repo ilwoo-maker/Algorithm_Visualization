@@ -124,7 +124,27 @@ Reverse-Delete는 무거운 간선부터 삭제를 시도한다. 제거 후에�
 
 ## 의사코드
 
-### Definition part
+### Definition part — Kruskal
+
+| 항목 | 정의 |
+|---|---|
+| Problem | 단순 무방향 연결 가중치 그래프에서 모든 정점을 연결하고 사이클이 없으며 간선 가중치 합이 최소인 신장 트리(MST)를 구한다. Kruskal은 가벼운 간선부터 서로 다른 연결 요소를 합친다. |
+| Parameter | 문제를 규정하는 그래프는 G=(𝒱, ℰ, w)이며, 𝒱는 정점 집합, ℰ는 무방향 간선 집합, w는 간선 가중치이다. 크기 매개변수 V=\|𝒱\|, E=\|ℰ\|는 입력에서 계산하며 별도의 함수 인자로 받지 않는다. |
+| Inputs | `kruskal(input: unknown)`의 `input`은 `{ vertices, edges }` 형태이다. 정점은 중복 없는 비어 있지 않은 문자열이며 최소 1개이고, 간선은 `{ source, target, weight }`이다. 끝점은 정점 목록에 있어야 하며 자기 루프·중복 무방향 간선은 허용하지 않는다. 가중치는 유한한 JavaScript `number`로 0·음수·소수를 허용한다. 정규화 순서의 가중치 절댓값 합이 유한하고 그래프가 연결되어 있어야 한다. 동률은 정규화된 이름·ID 오름차순으로 처리한다. |
+| Outputs | 성공 시 `{ ok: true, value: { algorithm: 'kruskal', mst, totalWeight, snapshots } }`를 반환한다. `mst`는 정규화 이름순의 최종 간선 V−1개, `totalWeight`는 최종 MST 가중치 합이다. `snapshots`는 초기 상태와 각 선택·기각의 불변 기록으로, T개 간선을 검사하면 1+T개이다. 단일 정점이면 빈 MST·가중치 0·초기 기록 1개를 반환한다. 검증 실패 시 `{ ok: false, error: { code, message } }`를 반환한다. |
+
+### Definition part — Reverse-Delete
+
+| 항목 | 정의 |
+|---|---|
+| Problem | 같은 MST 문제를 무거운 간선부터 제거하는 방식으로 해결한다. 각 제거 시도 후 연결성을 검사하여 연결이 유지되면 삭제하고, 끊기면 복구한다. |
+| Parameter | G=(𝒱, ℰ, w), V=\|𝒱\|, E=\|ℰ\|의 의미는 Kruskal과 같다. 두 알고리즘에 같은 그래프를 입력하며, V와 E는 별도 함수 인자가 아니다. |
+| Inputs | `reverseDelete(input: unknown)`은 Kruskal과 동일한 그래프 형식·유효성 조건을 사용한다. 모든 간선이 있는 상태에서 시작하며, 가중치 내림차순으로 검사한다. 동률은 가중치 방향과 무관하게 정규화된 이름·ID 오름차순으로 처리한다. |
+| Outputs | 성공 시 `{ ok: true, value: { algorithm: 'reverse-delete', mst, totalWeight, snapshots } }`를 반환한다. `mst`는 정규화 이름순의 최종 간선 V−1개, `totalWeight`는 최종 MST 가중치 합이다. `snapshots`는 초기 상태와 각 간선의 임시 제거·삭제 또는 복구 기록으로 총 1+2E개이다. 단일 정점이면 빈 MST·가중치 0·초기 기록 1개를 반환한다. 검증 실패 시 Kruskal과 같은 오류 형식을 반환한다. |
+
+두 알고리즘 모두 입력을 변경하지 않는다. 과제 그래프에서는 같은 MST를 반환하지만, 일반적인 동률 그래프에서는 간선 집합이 달라도 최적 가중치는 같다. 각 `Snapshot.totalWeight`는 그 시점의 활성 간선 합이며, 최종 결과의 `MstRun.totalWeight`와 구분한다. 특히 Reverse-Delete의 임시 제거 기록은 비연결 상태일 수 있다.
+
+### Definition part — 공통 자료구조와 보조 연산
 
 ```text
 Graph = (vertices: 문자열 배열, edges: (source, target, weight) 배열)
