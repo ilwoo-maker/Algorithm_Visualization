@@ -1,0 +1,11 @@
+# Single Giant MST Orbit Design
+
+Replace all four corner clusters, their Canvas painter and both background clocks with one centered SVG system in SingleGiantMstOrbitBackground.tsx. Baseline dev d848284 is clean;252tests pass. Preserve Lab, algorithms, controls, theory and Hero ScrollTrigger.
+
+Reference video was decoded read-only with Windows MediaPlayer; a five-second frame was inspected. Use its B-centered radial composition only. Actual edges/weights come from ASSIGNMENT_GRAPH; MST IDs are passed from the App's already-computed MstRun, never recomputed or inferred from color. B(500,500), A/C left-upper/lower, E/D right-upper/lower. AB2/BC1/BD1/BE4 solid glow/packets; AC3/CD5/DE7 faint dashes. All seven midpoint badges remain readable within the art.
+
+One fixed inert/pointer-free z0 layer inside existing isolated site; content remains z1. One top50%/left50%/translate(-50%,-50%) anchor of800–1100px on desktop; mobile480–760px inside a clipped viewport to retain all nodes without document overflow. Overall artwork opacity0.26. Keep existing reading surfaces and Hero spacing; remove obsolete corner positions. No new background controls or branding.
+
+Four rings rotate independently in alternating directions over210/240/290/340seconds (approximately0.0005rad/frame at60fps for the first ring). TextPaths follow rings; actual graph/nodes/weights never rotate. One ambient breathing tween and four MST-only packet tweens. A separate inner transform eases scroll scale1→0.75 and y0→−48 over two viewport heights. No mouse listener or background ScrollTrigger. Background-only GSAP context owns every tween; Reduced Motion restores a static full graph, hidden tabs pause only running decorative tweens, print hides and stops the system, cleanup cancels RAF/listeners/context.
+
+Remove obsolete four-cluster tests along with their implementation, replacing them with orbit geometry/data/ownership/accessibility/lifecycle tests; preserve all237 unrelated tests and original algorithm tests. Remove Canvas-only Vitest setup/config because no Canvas code remains. No dependency/core changes, push/PR/merge/deploy. Follow existing local-only commit policy. Video inspection is not verification of the new page; actual viewport/FPS/print/AT quality remains manual due prior browser safety restriction.
