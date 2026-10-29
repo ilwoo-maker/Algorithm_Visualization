@@ -37,11 +37,12 @@ it('preserves both owners across desktop/mobile resize and never auto-resumes th
 })
 it('supports roving tab focus and controls the correct persistent tabpanel', () => {
   viewport(); render(<App />); const left = screen.getByRole('tab', { name: 'Kruskal' }); left.focus()
+  const lab = within(screen.getByRole('region', { name: 'Algorithm Lab' }))
   fireEvent.keyDown(left, { key: 'ArrowRight' }); const right = screen.getByRole('tab', { name: 'Reverse-Delete' })
   expect(document.activeElement).toBe(right); expect(right.getAttribute('aria-selected')).toBe('true')
-  expect(screen.getByRole('tabpanel').id).toBe(right.getAttribute('aria-controls'))
+  expect(lab.getByRole('tabpanel').id).toBe(right.getAttribute('aria-controls'))
   fireEvent.keyDown(right, { key: 'Home' }); expect(document.activeElement).toBe(left)
-  expect(screen.getByRole('tabpanel').id).toBe(left.getAttribute('aria-controls'))
+  expect(lab.getByRole('tabpanel').id).toBe(left.getAttribute('aria-controls'))
 })
 it('keeps focused desktop content visible on compact resize and moves focus off disappearing tabs', () => {
   const resize = viewport(false); render(<App />); const right = scope('Reverse-Delete'); const next = right.getByRole<HTMLButtonElement>('button', { name: '다음' }); next.focus()

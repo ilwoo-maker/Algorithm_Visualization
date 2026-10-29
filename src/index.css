@@ -232,20 +232,19 @@ h1 span { color: var(--teal); }
 
 .section-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
 .section-links a { padding: 12px 16px; border: 1px solid #9fbab8; border-radius: 8px; color: #126c62; text-decoration: none; font-size: 13px; }
-.hero-section { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); min-height: 76vh; gap: 28px; }
+.hero-section { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; min-height: 76vh; gap: 28px; }
 .hero-section > .input-summary { grid-column: 1 / -1; width: auto; }
-.hero-graph, .concept-graph { min-width: 0; margin: 0; background: #142638; color: #d5e7f2; border-radius: 14px; border: 1px solid #36516a; }
-.hero-graph { transform-origin: center top; }
+.concept-graph { min-width: 0; margin: 0; background: #142638; color: #d5e7f2; border-radius: 14px; border: 1px solid #36516a; }
 .story-graph { width: 100%; display: block; max-height: 410px; }
 .story-vertex text { font-size: 18px; font-weight: 700; }
-.hero-graph figcaption, .concept-graph figcaption { padding: 0 18px 18px; font-size: 12px; line-height: 1.8; overflow-wrap: anywhere; }
+.concept-graph figcaption { padding: 0 18px 18px; font-size: 12px; line-height: 1.8; overflow-wrap: anywhere; }
 .concept-section, .lab-section, .theory-section { margin-block: 48px; scroll-margin-top: 24px; min-width: 0; }
 .concept-section h2, .theory-section > h2 { font-size: 27px; letter-spacing: -0.8px; }
 .concept-section > p, .concept-grid article p { font-size: 14px; line-height: 1.9; color: #536176; }
 .concept-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-block: 20px; }
 .concept-grid article { border-top: 2px solid #9fbab8; }
 .concept-grid h3 { font-size: 17px; }
-@media (max-width: 1199px) { .hero-section { grid-template-columns: 1fr; min-height: auto; } .hero-graph { max-width: 660px; width: 100%; justify-self: center; } }
+@media (max-width: 1199px) { .hero-section { grid-template-columns: 1fr; min-height: auto; } }
 @media (max-width: 650px) { .concept-grid { grid-template-columns: 1fr; } .concept-section h2, .theory-section > h2 { font-size: 23px; } }
 .lab-panel { min-width: 0; }
 .lab-tabs { display: flex; gap: 8px; margin-bottom: 16px; }

@@ -3,6 +3,7 @@ import type { EdgeStatus, MstRun } from '../algorithms/types'
 import { GraphView } from './GraphView'
 import { ACTION_NAMES, EDGE_STYLES } from './graphPresentation'
 import { useAlgorithmPlayback } from '../animation/useEdgeTransition'
+import './academicLab.css'
 
 export function AlgorithmPanel({ run, visible = true }: { run: MstRun; visible?: boolean }) {
   const weight = useRef<HTMLOutputElement>(null)
@@ -74,9 +75,9 @@ export function AlgorithmPanel({ run, visible = true }: { run: MstRun; visible?:
       </div>
 
       <div className="panel-content">
-        <div className="explanation" aria-live="polite" aria-atomic="true">
-          <div className="explanation-block"><h4><span className="explanation-dot" />무엇을 했나요?</h4><p>{snapshot.what}</p></div>
-          <div className="explanation-block why-block"><h4><span className="explanation-dot" />왜 그런가요?</h4><p>{snapshot.why}</p></div>
+        <div className="explanation" role="group" aria-label="단계별 동작과 판단 근거" aria-live="polite" aria-atomic="true">
+          <div className="explanation-block what-block"><span className="inspector-code" aria-hidden="true">WHAT / ACTION</span><h4><span className="explanation-dot" aria-hidden="true" />무엇을 했나요?</h4><p>{snapshot.what}</p></div>
+          <div className="explanation-block why-block"><span className="inspector-code" aria-hidden="true">WHY / DECISION</span><h4><span className="explanation-dot" aria-hidden="true" />왜 그런가요?</h4><ul className="why-reasons"><li>{snapshot.why}</li></ul></div>
           {isFinal && <p className="completion-label"><span aria-hidden="true">✓</span> <span>최종 MST 완성</span></p>}
           {isKruskal && isFinal && <p className="termination-note" role="note" aria-label="종료 조건 안내">
             정점 {snapshot.components.flat().length}개를 연결하는 신장 트리에 필요한 간선 {snapshot.activeEdgeIds.length}개를 선택했습니다.
@@ -86,10 +87,10 @@ export function AlgorithmPanel({ run, visible = true }: { run: MstRun; visible?:
           {disconnected && <p className="disconnection-note" role="note" aria-label="임시 단절 안내">임시 제거로 연결 요소가 {snapshot.components.length}개로 나뉘었습니다. 아래 가중치는 이 상태의 합이며 최종 MST 가중치가 아닙니다. 다음 단계에서 삭제 또는 복구 판정을 확인하세요.</p>}
         </div>
 
-        <div className="metrics">
+        <div className="metrics" role="group" aria-label="현재 스냅샷 수치">
           <div className="metric"><span>현재 활성 간선 가중치 합</span><output ref={weight} aria-label="현재 활성 간선 가중치 합">{snapshot.totalWeight}</output><small>{isFinal ? '최종 MST 가중치' : '현재 단계 기준'}</small></div>
-          <div className="metric"><span>현재 활성 간선 수</span><output aria-label="현재 활성 간선 수">{snapshot.activeEdgeIds.length}</output><small>전체 {snapshot.edges.length}개 중</small></div>
-          <div className="metric"><span>연결 요소</span><strong>{snapshot.components.length}</strong><small>{snapshot.components.length === 1 ? '모든 정점 연결됨' : '분리된 정점 집합'}</small></div>
+          <div className="metric"><span>현재 활성 간선 수</span><div className="metric-value-row"><output aria-label="현재 활성 간선 수">{snapshot.activeEdgeIds.length}</output><span className="metric-denominator" aria-hidden="true">/ {snapshot.edges.length}</span></div><small>전체 {snapshot.edges.length}개 중</small></div>
+          <div className="metric"><span>연결 요소</span><div className="metric-value-row"><strong aria-label="연결 요소 수">{snapshot.components.length}</strong><span className="metric-denominator" aria-hidden="true">개</span></div><small>{snapshot.components.length === 1 ? '모든 정점 연결됨' : '분리된 정점 집합'}</small></div>
         </div>
 
         <div className="components-info"><h4>연결 요소 구성</h4><ul aria-label="연결 요소">{snapshot.components.map((group, groupIndex) => <li key={groupIndex}>{group.join(', ')}</li>)}</ul></div>

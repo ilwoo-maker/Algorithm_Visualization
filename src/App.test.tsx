@@ -150,14 +150,15 @@ describe('independent snapshot playback', () => {
   it('keeps the sample final-result comparison independent of either current panel step', async () => {
     const user = userEvent.setup()
     render(<App />)
+    await user.click(screen.getByRole('tab', { name: '최종 실행 결과 비교' }))
     const summary = within(screen.getByRole('region', { name: '샘플 그래프의 최종 실행 결과' }))
     const verifySummary = () => {
       const table = within(summary.getByRole('table'))
       expect(table.getByRole('row', { name: '최종 MST AB, BC, BD, BE AB, BC, BD, BE' })).toBeDefined()
       expect(table.getByRole('row', { name: '최종 가중치 8 8' })).toBeDefined()
-      expect(table.getByRole('row', { name: '접근 방식 작은 가중치부터 선택 큰 가중치부터 삭제 시도' })).toBeDefined()
+      expect(table.getByRole('row', { name: '접근 방식 상향식 · 작은 이음선부터 추가 하향식 · 큰 이음선부터 삭제 시도' })).toBeDefined()
       expect(table.getByRole('row', { name: '핵심 판단 사이클 발생 여부 연결성 유지 여부' })).toBeDefined()
-      expect(summary.getByText(/간선 집합이 달라질 수/)).toBeDefined()
+      expect(summary.getByText(/이음선 집합이 달라질 수/)).toBeDefined()
     }
     verifySummary()
     const k = within(screen.getByRole('region', { name: 'Kruskal' }))

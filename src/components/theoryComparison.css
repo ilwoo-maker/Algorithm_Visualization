@@ -1,0 +1,118 @@
+.algorithm-content .theory-section.theory-comparison { padding: clamp(18px, 3vw, 36px); background: #070d1df5; border: 1px solid #28344b; border-radius: 22px; color: #d7e1f0; box-shadow: 0 24px 70px #0004; }
+.theory-comparison *, .theory-comparison *::before { box-sizing: border-box; }
+.theory-comparison .theory-section-heading { margin-bottom: 26px; }
+.theory-comparison h2 { margin: 8px 0 10px; color: #f0f5ff; font-size: clamp(24px, 3vw, 32px); letter-spacing: -.8px; }
+.theory-comparison h3, .theory-comparison h4 { color: #e6edf9; }
+.theory-comparison p, .theory-comparison li, .theory-comparison dd { font-size: 13px; line-height: 1.9; overflow-wrap: anywhere; }
+.theory-comparison p { color: #a8b8ce; margin: 10px 0; }
+.theory-comparison strong { color: #dce9f7; }
+.theory-comparison .theory-kicker { margin: 0 0 10px; font: 600 10px/1.7 ui-monospace, Consolas, monospace; color: #6ee7c1; letter-spacing: 1px; }
+.theory-comparison :focus-visible { outline: 2px solid #7dd3fc; outline-offset: 4px; }
+.theory-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; padding: 6px; border: 1px solid #243148; border-radius: 13px; background: #040917; }
+.theory-tabs button { min-width: 0; min-height: 48px; padding: 10px 12px; border: 1px solid transparent; border-radius: 9px; color: #a0b0c7; font-size: 12px; font-weight: 600; line-height: 1.6; background: transparent; word-break: keep-all; }
+.theory-tabs button:hover { color: #edf5ff; background: #122038; }
+.theory-tabs button[aria-selected="true"] { background: #14263b; color: #81f0cd; border-color: #2b645e; box-shadow: inset 0 1px 0 #bafce012; }
+.theory-tabpanel { padding-top: 26px; min-width: 0; }
+.theory-tabpanel[hidden] { display: none; }
+.theory-comparison .theory-panel-title { margin: 0 0 20px; font-size: 18px; }
+.theory-card-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; margin-block: 18px; }
+.theory-card { min-width: 0; margin-block: 18px; padding: 24px; border: 1px solid #26334a; border-radius: 16px; background: #0f192bb3; }
+.theory-card-grid > .theory-card { margin-block: 0; height: 100%; }
+.theory-comparison .theory-card h4, .theory-comparison .theory-document-group > h4 { margin: 0 0 14px; font-size: 16px; line-height: 1.6; }
+.theory-comparison p code, .theory-comparison dd code, .theory-comparison td code, .theory-comparison li code { padding: 2px 5px; border: 1px solid #31435a; border-radius: 5px; background: #1a293e; color: #7ee7bd; font: .9em/1.8 ui-monospace, Consolas, monospace; box-decoration-break: clone; }
+.theory-formula { padding: 19px; margin-block: 20px; border-left: 2px solid #2dd4bf; background: #10b98109; color: #6ee7c1; font: 18px/1.8 ui-monospace, Consolas, monospace; }
+.theory-formula span { display: block; font-size: 12px; color: #90b7c9; }
+.theory-sample-spec, .theory-spec { margin: 0; }
+.theory-sample-spec > div, .theory-spec > div { padding: 13px 0; border-bottom: 1px solid #27364b; }
+.theory-spec > div:last-child, .theory-sample-spec > div:last-child { border-bottom: 0; }
+.theory-sample-spec dt, .theory-spec dt { color: #80ddc1; font: 600 11px/1.7 ui-monospace, Consolas, monospace; margin-bottom: 8px; }
+.theory-sample-spec dd, .theory-spec dd { margin: 0; color: #bdcadb; }
+.theory-output-weight { display: block; margin-top: 12px; color: #a4b5cc; }
+.theory-output-weight strong { margin-left: 8px; color: #6ee7c1; font: 600 24px/1.5 ui-monospace, Consolas, monospace; }
+.theory-disclosure > summary { cursor: pointer; color: #bfd4e9; font-size: 12px; font-weight: 600; line-height: 1.8; padding: 10px 0; }
+.theory-disclosure[open] > summary { margin-bottom: 16px; border-bottom: 1px solid #27364b; color: #82e8c5; }
+.theory-doc { min-width: 0; }
+.theory-doc > :first-child { margin-top: 0; }
+.theory-code-editor { min-width: 0; margin: 12px 0 0; background: #0b1329; border: 1px solid #26334b; border-radius: 13px; overflow: hidden; }
+.theory-code-editor figcaption { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 1px solid #24314a; color: #c5d3e6; font: 11px/1.5 ui-monospace, Consolas, monospace; overflow-wrap: anywhere; }
+.editor-lights { display: inline-flex; gap: 5px; flex-shrink: 0; }
+.editor-lights i { width: 6px; height: 6px; border-radius: 50%; background: #f4757d; }
+.editor-lights i:nth-child(2) { background: #dbb45f; }
+.editor-lights i:nth-child(3) { background: #57b997; }
+.editor-kind { margin-left: auto; color: #7f90aa; font-size: 8px; letter-spacing: 1px; }
+.theory-code-editor pre { margin: 0; max-height: 560px; padding: 18px 12px 18px 0; overflow: auto; color: #cbd7e9; font: 11px/1.9 ui-monospace, Consolas, monospace; tab-size: 2; }
+.theory-code-editor pre > code { display: block; font: inherit; }
+.code-line { display: grid; grid-template-columns: 36px minmax(0, 1fr); }
+.code-line-number { color: #60738e; text-align: right; padding-right: 12px; user-select: none; }
+.code-text { min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.code-keyword { color: #7dd3fc; }
+.code-identifier { color: #6ee7b7; }
+.code-comment { color: #8291a6; font-style: italic; }
+.theory-scope-note { padding: 14px 18px; background: #38bdf809; border: 1px solid #32617c; border-radius: 10px; }
+.theory-metric dl { margin: 20px 0 12px; }
+.theory-metric dl > div { margin-block: 14px; }
+.theory-metric dt { margin-bottom: 7px; color: #a0b2cb; font-size: 11px; }
+.theory-metric dd { margin: 0; color: #6ee7c1; font: 22px/1.5 ui-monospace, Consolas, monospace; }
+.lecture-analysis-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-block: 14px; }
+.lecture-analysis-meta > span { padding: 8px 12px; background: #101e32; border: 1px solid #2c4059; border-radius: 8px; color: #c4d4e8; font-size: 12px; }
+.lecture-analysis-meta code { color: #6ee7c1; font: 12px/1.6 ui-monospace, Consolas, monospace; }
+.theory-comparison .lecture-worst-case { padding: 16px 14px; border: 1px solid #29635a; border-radius: 10px; background: #10b9810c; color: #80f1cc; font-size: clamp(17px, 1.8vw, 23px); line-height: 1.8; overflow-wrap: anywhere; }
+.lecture-complete-case { padding: 14px 0; border-top: 1px solid #27384c; }
+.lecture-complete-case span { display: block; color: #9fb8d1; font-size: 11px; margin-bottom: 6px; }
+.theory-comparison .lecture-complete-case strong { color: #7dd3fc; font: 600 22px/1.7 ui-monospace, Consolas, monospace; }
+.theory-math-block { margin-block: 18px; padding: 18px 20px; border: 1px solid #2c4f62; border-left: 3px solid #38bdf8; border-radius: 10px; background: #091728; color: #9cebcf; font: 16px/2 ui-monospace, Consolas, monospace; overflow-wrap: anywhere; }
+.theory-math-block > div { white-space: pre-wrap; }
+.theory-comparison .theory-memory-note { color: #a9cde9; border-top: 1px solid #26334a; padding-top: 13px; font-size: 11px; }
+.theory-list { padding-left: 20px; margin: 12px 0; color: #b2c1d5; }
+.theory-list li { margin-block: 12px; padding-left: 5px; }
+.theory-operations .theory-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; list-style: none; padding: 0; }
+.theory-operations .theory-list li { margin: 0; padding: 16px; background: #080f20; border: 1px solid #243148; border-radius: 10px; }
+.theory-efficiency .theory-doc > p:first-child { border-left: 2px solid #34d399; padding: 14px 18px; background: #10b9810c; border-radius: 0 8px 8px 0; }
+.theory-table-scroll { max-width: 100%; min-width: 0; overflow-x: auto; margin-block: 16px; border: 1px solid #29364d; border-radius: 10px; }
+.theory-comparison .theory-table-scroll table { width: 100%; min-width: 540px; table-layout: fixed; border-collapse: collapse; background: transparent; color: #b9c8dd; font-size: 12px; line-height: 1.8; text-align: left; }
+.theory-comparison .theory-table-scroll caption { padding: 12px 14px; text-align: left; font-size: 11px; color: #8aa9c6; background: #0b1426; }
+.theory-comparison .theory-table-scroll th, .theory-comparison .theory-table-scroll td { padding: 13px 16px; border: 0; border-bottom: 1px solid #27334a; vertical-align: top; overflow-wrap: anywhere; }
+.theory-comparison .theory-table-scroll thead { background: #142138; color: #dce9f9; }
+.theory-comparison .theory-table-scroll tbody th { color: #b9cce1; background: #0a1323; font-weight: 500; }
+.theory-comparison .theory-table-scroll tbody tr:last-child > * { border-bottom: 0; }
+.theory-result-banner { padding: 26px; background: linear-gradient(120deg, #0e352f, #0c2335); border: 1px solid #276d61; border-radius: 15px; }
+.theory-result-banner h4 { font-size: 21px; margin: 8px 0; }
+.theory-result-banner > div { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; margin-top: 20px; color: #b9d0df; font-size: 12px; }
+.theory-result-banner code { padding: 8px 12px; border: 1px solid #386257; border-radius: 8px; color: #a7f3d0; background: #081b22; font: 14px/1.7 ui-monospace, Consolas, monospace; overflow-wrap: anywhere; }
+.theory-result-banner strong { margin-left: 8px; color: #72f1c6; font: 600 30px/1.2 ui-monospace, Consolas, monospace; }
+.theory-comparison .final-comparison { margin-top: 22px; padding: 24px; background: #0f192bb3; border-color: #29364d; border-radius: 15px; }
+.theory-comparison .final-comparison h3 { font-size: 17px; }
+.theory-comparison .final-comparison-heading > p:last-child, .theory-comparison .tie-note { color: #a4b5cb; font-size: 12px; }
+.theory-comparison .final-comparison .final-weight { color: #6ee7c1; font-size: 22px; }
+@media (max-width: 900px) { .theory-card-grid, .theory-operations .theory-list { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 650px) {
+  .algorithm-content .theory-section.theory-comparison { padding: 16px; border-radius: 16px; }
+  .theory-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .theory-tabs button { min-height: 50px; padding: 8px; font-size: 11px; }
+  .theory-card, .theory-result-banner, .theory-comparison .final-comparison { padding: 17px; }
+  .theory-card-grid { gap: 14px; }
+  .editor-kind { display: none; }
+  .theory-metric dd { font-size: 20px; }
+}
+@media print {
+  .algorithm-content .theory-section.theory-comparison { padding: 0; margin: 0; color: #111; background: white !important; border: 0; box-shadow: none; }
+  .theory-tabs { display: none !important; }
+  .theory-tabpanel, .theory-tabpanel[hidden] { display: block !important; padding: 12pt 0; overflow: visible; }
+  .theory-tabpanel + .theory-tabpanel { break-before: page; }
+  .theory-comparison h2, .theory-comparison h3, .theory-comparison h4, .theory-comparison p, .theory-comparison li, .theory-comparison dd, .theory-comparison dt, .theory-comparison strong, .theory-comparison span, .theory-comparison code, .theory-comparison summary { color: #111 !important; -webkit-text-fill-color: #111; text-shadow: none; }
+  .theory-card-grid, .theory-operations .theory-list { display: block; }
+  .theory-card, .theory-result-banner, .theory-comparison .final-comparison, .theory-operations .theory-list li { padding: 10pt; margin-block: 10pt; background: white; border: 1px solid #bbb; box-shadow: none; }
+  .theory-disclosure::details-content { display: contents !important; content-visibility: visible !important; }
+  .theory-disclosure > :not(summary) { display: block !important; }
+  .theory-code-editor { overflow: visible; background: white; border: 1px solid #bbb; break-inside: auto; }
+  .theory-code-editor figcaption { background: white; border-color: #bbb; color: #111; }
+  .editor-lights, .editor-kind { display: none; }
+  .theory-code-editor pre { max-height: none; overflow: visible; background: white; font-size: 8pt; break-inside: auto; }
+  .code-line { break-inside: avoid; }
+  .theory-comparison .theory-table-scroll { overflow: visible; border-color: #bbb; }
+  .theory-comparison .theory-table-scroll table { min-width: 0; width: 100%; font-size: 8pt; color: #111; }
+  .theory-comparison .theory-table-scroll caption, .theory-comparison .theory-table-scroll th, .theory-comparison .theory-table-scroll td { padding: 6pt; background: white; color: #111; border-color: #bbb; }
+  .theory-comparison .theory-formula, .theory-comparison .theory-scope-note, .theory-comparison .theory-efficiency .theory-doc > p:first-child, .theory-result-banner code { background: white; border-color: #aaa; color: #111; }
+  .theory-comparison .theory-metric dd { font-size: 15pt; }
+  .theory-comparison .theory-math-block, .theory-comparison .lecture-worst-case, .theory-comparison .lecture-analysis-meta > span { background: white; border-color: #aaa; color: #111; font-size: 10pt; }
+}

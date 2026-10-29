@@ -1,101 +1,100 @@
 // @vitest-environment jsdom
-import { afterEach, expect, it, vi } from 'vitest'
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
-import App from '../App'
 import { StrictMode } from 'react'
-import { act } from '@testing-library/react'
-import { gsap } from 'gsap'
-afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.restoreAllMocks() })
-function orbit() { const root = document.querySelector<HTMLElement>('[data-mst-orbit]'); expect(root).not.toBeNull(); return root! }
-it('replaces every corner cluster/canvas with one centered noninteractive orbit', () => {
-  render(<App />); const root = orbit(), anchor = root.querySelector<HTMLElement>('.mst-orbit-anchor')!
-  expect(document.querySelectorAll('[data-mst-orbit]')).toHaveLength(1)
-  expect(document.querySelectorAll('[data-art-cluster], canvas')).toHaveLength(0)
-  expect(root.querySelectorAll('svg')).toHaveLength(1)
-  expect(root.style.position).toBe('fixed'); expect(root.style.pointerEvents).toBe('none'); expect(root.style.zIndex).toBe('0')
-  expect(root.getAttribute('aria-hidden')).toBe('true'); expect(root.hasAttribute('inert')).toBe(true)
-  expect(anchor.style.top).toBe('50%'); expect(anchor.style.left).toBe('50%'); expect(anchor.style.transform).toBe('translate(-50%, -50%)')
-  expect(root.querySelectorAll('button, input, a, [tabindex]')).toHaveLength(0)
-})
-it('places B at the center with A/C on the left and E/D on the right', () => {
-  render(<App />); const root = orbit()
-  expect(root.querySelectorAll('[data-orbit-node]')).toHaveLength(5)
-  const point = (name: string) => { const circle = root.querySelector(`[data-orbit-node="${name}"] .orbit-node-disc`)!; return [Number(circle.getAttribute('cx')), Number(circle.getAttribute('cy'))] }
-  expect(point('B')).toEqual([500, 500]); expect(point('A')).toEqual([260, 290]); expect(point('C')).toEqual([260, 710]); expect(point('E')).toEqual([740, 290]); expect(point('D')).toEqual([740, 710])
-  expect(root.querySelectorAll('.orbit-ring')).toHaveLength(4)
-  expect(root.querySelectorAll('textPath').length).toBeGreaterThanOrEqual(2)
-})
-it('uses all actual weights and only the four final MST edges for glow and packets', () => {
-  render(<App />); const root = orbit()
-  const weights: Record<string, string> = { AB: '2', BC: '1', BD: '1', BE: '4', AC: '3', CD: '5', DE: '7' }
-  expect(root.querySelectorAll('[data-orbit-edge]')).toHaveLength(7)
-  for (const [name, weight] of Object.entries(weights)) {
-    const group = root.querySelector(`[data-orbit-edge="${name}"]`)!
-    expect(group.querySelector('.orbit-weight')!.textContent).toBe(weight)
-    const mst = ['AB', 'BC', 'BD', 'BE'].includes(name)
-    expect(group.querySelector('.orbit-packet') !== null).toBe(mst)
-    expect(group.querySelector('.orbit-edge')!.getAttribute('stroke-dasharray')).toBe(mst ? null : '6 8')
+import { afterEach, expect, it, vi } from 'vitest'
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { SingleGiantMstOrbitBackground } from './SingleGiantMstOrbitBackground'
+import { recordingContext } from '../test/orbitContext'
+import { kruskal } from '../algorithms/kruskal'
+import { ASSIGNMENT_GRAPH } from '../algorithms/fixtures'
+import App from '../App'
+
+const result = kruskal(ASSIGNMENT_GRAPH)
+if (!result.ok) throw new Error('Fixture must succeed')
+const mst = result.value.mst
+const orbit = () => document.querySelector<HTMLElement>('[data-mst-orbit]')!
+afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals() })
+function environment(initialReduced = false) {
+  const recording = recordingContext(), frames = new Map<number, FrameRequestCallback>(), media = new Map<string, { matches: boolean; events: EventTarget }>()
+  let id = 0
+  vi.stubGlobal('CanvasRenderingContext2D', class {})
+  vi.stubGlobal('innerWidth', 1440); vi.stubGlobal('innerHeight', 900); vi.stubGlobal('devicePixelRatio', 3)
+  vi.spyOn(document, 'hidden', 'get').mockReturnValue(false)
+  vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(recording.context)
+  vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => { frames.set(++id, callback); return id })
+  vi.stubGlobal('cancelAnimationFrame', (frame: number) => { frames.delete(frame) })
+  vi.stubGlobal('matchMedia', (query: string) => {
+    if (!media.has(query)) media.set(query, { matches: query.includes('reduce') && initialReduced, events: new EventTarget() })
+    const entry = media.get(query)!
+    return { get matches() { return entry.matches }, addEventListener: entry.events.addEventListener.bind(entry.events), removeEventListener: entry.events.removeEventListener.bind(entry.events) }
+  })
+  return {
+    ...recording, frames,
+    step(time: number) { const pending = [...frames.values()]; frames.clear(); act(() => { pending.forEach(callback => callback(time)) }) },
+    change(query: string, matches: boolean) { const entry = media.get(query)!; entry.matches = matches; act(() => { entry.events.dispatchEvent(new Event('change')) }) },
   }
+}
+it('mounts one noninteractive Canvas with no old clusters or duplicate Hero graph', () => {
+  environment(); render(<App />)
+  expect(document.querySelectorAll('[data-mst-orbit]')).toHaveLength(1)
+  expect(orbit().querySelectorAll('canvas')).toHaveLength(1); expect(orbit().querySelector('svg')).toBeNull()
+  expect(orbit().style.position).toBe('fixed'); expect(orbit().style.pointerEvents).toBe('none'); expect(orbit().style.zIndex).toBe('0')
+  expect(orbit().getAttribute('aria-hidden')).toBe('true'); expect(orbit().hasAttribute('inert')).toBe(true)
+  expect(document.querySelector('[data-art-cluster]')).toBeNull()
+  expect(screen.getByRole('region', { name: 'MST 도입' }).querySelector('figure')).toBeNull()
+  expect(screen.getByRole('link', { name: 'Algorithm Lab 탐색하기' }).getAttribute('href')).toBe('#comparison')
 })
-it('keeps Lab steps and controls independent of the decorative final result', () => {
-  render(<App />); orbit(); const panel = within(screen.getByRole('region', { name: 'Kruskal' }))
-  fireEvent.change(panel.getByRole('combobox'), { target: { value: '3' } }); fireEvent.scroll(window)
+it('owns one StrictMode frame, caps DPR, handles resize and cancels work/listeners on unmount', () => {
+  const env = environment(); const view = render(<StrictMode><SingleGiantMstOrbitBackground mst={mst} /></StrictMode>)
+  const canvas = orbit().querySelector('canvas')!
+  expect(canvas.width).toBe(2880); expect(canvas.height).toBe(1800); expect(env.frames.size).toBe(1)
+  env.step(0); env.step(40); expect(env.frames.size).toBe(1)
+  vi.stubGlobal('innerWidth', 390); fireEvent.resize(window)
+  expect(canvas.width).toBe(780); expect(env.frames.size).toBe(1)
+  view.unmount(); expect(env.frames.size).toBe(0)
+  env.methods.fillRect.mockClear(); fireEvent.resize(window); fireEvent.mouseMove(window, { clientX: 100 }); env.step(100)
+  expect(env.methods.fillRect).not.toHaveBeenCalled()
+})
+it('eases mouse parallax within a bounded range without changing graph state', () => {
+  const env = environment(); render(<SingleGiantMstOrbitBackground mst={mst} />)
+  fireEvent.mouseMove(window, { clientX: 1440, clientY: 0 }); env.step(0); env.step(40)
+  const translations = env.methods.translate.mock.calls.filter(([x]) => Number(x) > 800)
+  const [x, y] = translations.at(-1)!.map(Number)
+  expect(x).toBeGreaterThan(1440 * .58); expect(x).toBeLessThanOrEqual(1440 * .58 + 14)
+  expect(y).toBeLessThan(900 * .49); expect(y).toBeGreaterThanOrEqual(900 * .49 - 10)
+})
+it('pauses while hidden, hides/stops for print and resumes with one frame', () => {
+  const env = environment(); render(<SingleGiantMstOrbitBackground mst={mst} />)
+  vi.spyOn(document, 'hidden', 'get').mockReturnValue(true); fireEvent(document, new Event('visibilitychange')); expect(env.frames.size).toBe(0)
+  vi.spyOn(document, 'hidden', 'get').mockReturnValue(false); fireEvent(document, new Event('visibilitychange')); expect(env.frames.size).toBe(1)
+  env.change('print', true); expect(orbit().hidden).toBe(true); expect(env.frames.size).toBe(0)
+  env.change('print', false); expect(orbit().hidden).toBe(false); expect(env.frames.size).toBe(1)
+})
+it('renders a static Canvas for Reduced Motion from mount and after preference changes', () => {
+  const env = environment(true); render(<SingleGiantMstOrbitBackground mst={mst} />)
+  expect(env.frames.size).toBe(0); expect(env.methods.fillRect).toHaveBeenCalled()
+  env.methods.fillRect.mockClear(); fireEvent.mouseMove(window, { clientX: 1440 }); env.step(40)
+  expect(env.methods.fillRect).not.toHaveBeenCalled()
+  env.change('(prefers-reduced-motion: reduce)', false); expect(env.frames.size).toBe(1)
+  env.change('(prefers-reduced-motion: reduce)', true); expect(env.frames.size).toBe(0)
+})
+it('keeps Lab navigation and snapshot metrics independent of background scroll and pointer input', () => {
+  environment(); render(<App />); const panel = within(screen.getByRole('region', { name: 'Kruskal' }))
+  fireEvent.change(panel.getByRole('combobox'), { target: { value: '3' } }); fireEvent.scroll(window); fireEvent.mouseMove(window, { clientX: 1440 })
   expect(panel.getByRole<HTMLSelectElement>('combobox').value).toBe('3')
   expect(panel.getByLabelText('현재 활성 간선 가중치 합').textContent).toBe('4')
   fireEvent.click(panel.getByRole('button', { name: '이전' })); expect(panel.getByRole<HTMLSelectElement>('combobox').value).toBe('2')
 })
-function preferences(initialReduced = false) {
-  const entries = new Map<string, { matches: boolean; addEventListener: EventTarget['addEventListener']; removeEventListener: EventTarget['removeEventListener']; dispatchEvent: EventTarget['dispatchEvent'] }>()
-  vi.stubGlobal('matchMedia', (query: string) => {
-    if (!entries.has(query)) { const events = new EventTarget(); entries.set(query, { matches: query.includes('reduce') && initialReduced, addEventListener: events.addEventListener.bind(events), removeEventListener: events.removeEventListener.bind(events), dispatchEvent: events.dispatchEvent.bind(events) }) }
-    return entries.get(query)
-  })
-  return (query: string, value: boolean) => { const entry = entries.get(query)!; entry.matches = value; act(() => { entry.dispatchEvent(new Event('change')) }) }
-}
-function tweens() { return [...orbit().querySelectorAll('*')].flatMap(element => gsap.getTweensOf(element)) }
-it('owns four slow opposite ring rotations without rotating graph coordinates and cleans StrictMode owners', () => {
-  preferences(); const view = render(<StrictMode><App /></StrictMode>), root = orbit()
-  const positions = [...root.querySelectorAll('.orbit-node-disc')].map(node => [node.getAttribute('cx'), node.getAttribute('cy')])
-  const rings = [...root.querySelectorAll('.orbit-ring')]
-  rings.forEach((ring, i) => {
-    const animations = gsap.getTweensOf(ring); expect(animations).toHaveLength(1)
-    expect(animations[0].duration()).toBeGreaterThanOrEqual(200); expect(animations[0].repeat()).toBe(-1)
-    expect(animations[0].vars.rotation).toBe(i % 2 ? -360 : 360)
-    act(() => { animations[0].progress(0.25) })
-  })
-  expect([...root.querySelectorAll('.orbit-node-disc')].map(node => [node.getAttribute('cx'), node.getAttribute('cy')])).toEqual(positions)
-  const owned = tweens(); expect(owned.length).toBeLessThanOrEqual(12)
-  view.unmount(); for (const animation of owned) expect(animation.parent).toBeNull()
-  for (const element of root.querySelectorAll<SVGElement>('.orbit-ring,.orbit-packet,.orbit-breath,.mst-orbit-scroll')) expect(element.style.cssText).toBe('')
-})
-it('scales to 0.75 on scroll while keeping the center anchor and Lab selection intact', async () => {
-  preferences(); render(<App />); const root = orbit(), scroll = root.querySelector('.mst-orbit-scroll')!
-  const panel = within(screen.getByRole('region', { name: 'Kruskal' })); fireEvent.change(panel.getByRole('combobox'), { target: { value: '3' } })
-  vi.stubGlobal('scrollY', window.innerHeight * 4)
-  await act(async () => { fireEvent.scroll(window); await new Promise<void>(resolve => requestAnimationFrame(() => resolve())) })
-  act(() => { gsap.getTweensOf(scroll).forEach(animation => { animation.progress(1) }) })
-  expect([Number(gsap.getProperty(scroll, 'scaleX')), Number(gsap.getProperty(scroll, 'scaleY')), Number(gsap.getProperty(scroll, 'y'))]).toEqual([0.75, 0.75, -48])
-  expect(root.querySelector<HTMLElement>('.mst-orbit-anchor')!.style.transform).toBe('translate(-50%, -50%)')
-  expect(panel.getByRole<HTMLSelectElement>('combobox').value).toBe('3')
-})
-it('switches to a static full orbit on Reduced Motion and restores no stale transforms', () => {
-  const change = preferences(); render(<App />); expect(tweens().length).toBeGreaterThan(0)
-  change('(prefers-reduced-motion: reduce)', true); expect(tweens()).toHaveLength(0)
-  expect(orbit().querySelectorAll('[data-orbit-node]')).toHaveLength(5)
-  expect((orbit().querySelector('.mst-orbit-scroll') as HTMLElement).style.cssText).toBe('')
-  change('(prefers-reduced-motion: reduce)', false); expect(tweens().length).toBeGreaterThan(0)
-})
-it('pauses only running decorative work while the tab is hidden and hides everything for print', () => {
-  const change = preferences(); render(<App />); const ring = gsap.getTweensOf(orbit().querySelector('.orbit-ring')!)[0]
-  expect(ring).toBeDefined()
-  vi.spyOn(document, 'hidden', 'get').mockReturnValue(true); act(() => { document.dispatchEvent(new Event('visibilitychange')) }); expect(ring.paused()).toBe(true)
-  vi.spyOn(document, 'hidden', 'get').mockReturnValue(false); act(() => { document.dispatchEvent(new Event('visibilitychange')) }); expect(ring.paused()).toBe(false)
-  change('print', true); expect(orbit().hidden).toBe(true); expect(tweens()).toHaveLength(0)
-  expect(screen.getByRole('row', { name: '최종 가중치 8 8' })).toBeDefined()
-  change('print', false); expect(orbit().hidden).toBe(false)
-})
-it('leaves Reduced Motion static from first mount and preserves the 0.26 global art opacity', () => {
-  preferences(true); render(<App />)
-  expect(tweens()).toHaveLength(0); expect(orbit().querySelector<SVGElement>('svg')!.style.opacity).toBe('0.26')
-  expect(orbit().querySelectorAll('.orbit-packet')).toHaveLength(4)
+it('draws each animation frame and uses the same eased mouse position at 60Hz and 120Hz', () => {
+  const sample = (hz: number) => {
+    const env = environment(), view = render(<SingleGiantMstOrbitBackground mst={mst} />)
+    env.step(0); env.methods.fillRect.mockClear()
+    fireEvent.mouseMove(window, { clientX: 1440, clientY: 0 })
+    for (let index = 1; index <= hz / 10; index++) env.step(index * 1000 / hz)
+    expect(env.methods.fillRect).toHaveBeenCalledTimes(hz / 10 * 2)
+    const position = env.methods.translate.mock.calls.filter(([x]) => Number(x) > 800).at(-1)!.map(Number)
+    view.unmount(); return position
+  }
+  const sixty = sample(60), faster = sample(120)
+  expect(sixty[0]).toBeCloseTo(1440 * .58 + 14 * (1 - .96 ** 6))
+  expect(faster[0]).toBeCloseTo(sixty[0]); expect(faster[1]).toBeCloseTo(sixty[1])
 })

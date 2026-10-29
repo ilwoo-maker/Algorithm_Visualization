@@ -31,7 +31,7 @@ export function AlgorithmLabSection({ runs }: { runs: readonly Result<MstRun>[] 
     return () => { media?.removeEventListener('change', update); window.removeEventListener('afterprint', update) }
   }, [])
   const choose = (index: number) => { setSelected(index); tabs.current[index]?.focus() }
-  return <section ref={root} aria-label="Algorithm Lab" className="lab-section" id="comparison" tabIndex={-1}>
+  return <section ref={root} aria-label="Algorithm Lab" className="lab-section academic-lab" id="comparison" tabIndex={-1}>
     <div className="comparison-heading"><h2>알고리즘 나란히 보기</h2><p>각 패널의 단계를 독립적으로 이동할 수 있습니다.</p></div>
     <div className="lab-tabs" role="tablist" aria-label="실습 알고리즘" hidden={!compact}>
       {runs.map((result, index) => <button key={index} ref={element => { tabs.current[index] = element }} type="button" role="tab" id={`${id}-tab-${index}`} aria-controls={`${id}-panel-${index}`} aria-selected={selected === index} tabIndex={selected === index ? 0 : -1}
