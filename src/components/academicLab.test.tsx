@@ -16,7 +16,8 @@ it('keeps terminal captions tied to the same read-only example snapshots', () =>
     const log = screen.getByRole('group', { name: `${name} 개념 로그` })
     const example = run.snapshots.find(step => run.algorithm === 'kruskal' ? step.action === 'accept' : step.action === 'try-remove' && step.components.length > 1)!
     expect(log.textContent).toContain(example.what); expect(log.textContent).toContain(example.why)
-    expect(log.textContent).toContain(`현재 활성 합 ${example.totalWeight}`)
+    expect(log.textContent).not.toContain('현재 활성 합')
+    expect(log.textContent).not.toContain('개념용 읽기 전용 예시입니다.')
   }
   expect(screen.queryByRole('button')).toBeNull(); expect(JSON.stringify(runs)).toBe(before)
 })

@@ -3,9 +3,9 @@ import { afterEach, expect, it } from 'vitest'
 import { cleanup, render, screen, within } from '@testing-library/react'
 import App from './App'
 afterEach(cleanup)
-it('orders four distinct sections with direct Lab and Theory navigation', () => {
+it('orders five distinct sections with direct Lab and Theory navigation', () => {
   render(<App />)
-  const regions = ['MST 도입', '알고리즘 개념 비교', 'Algorithm Lab', '이론과 비교'].map(name => screen.getByRole('region', { name }))
+  const regions = ['MST 도입', '알고리즘 개념 비교', 'Algorithm Lab', '두 알고리즘 핵심 비교 및 효율성 평가', '이론과 비교'].map(name => screen.getByRole('region', { name }))
   for (let i = 1; i < regions.length; i++) expect(regions[i - 1].compareDocumentPosition(regions[i]) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   expect(screen.getByRole('link', { name: 'Algorithm Lab 탐색하기' }).getAttribute('href')).toBe('#comparison')
   expect(screen.getByRole('link', { name: '수도코드 / 복잡도' }).getAttribute('href')).toBe('#theory')
@@ -19,5 +19,5 @@ it('reuses both existing panels and keeps final results independent of the intro
     expect(panel.getByRole('button', { name: '다음' })).toBeDefined()
     expect(panel.getByRole('button', { name: '재생' })).toBeDefined()
   }
-  expect(screen.getByRole('tab', { name: '최종 실행 결과 비교' })).toBeDefined()
+  expect(screen.getByRole('row', { name: /^최종 결과 가중치 8.*가중치 8/ })).toBeDefined()
 })

@@ -4,7 +4,7 @@ import type { MstRun } from '../algorithms/types'
 export function MstHeroSection({ run }: { run?: MstRun }) {
   return <section className="intro hero-section" aria-label="MST 도입">
     <div className="hero-card"><p className="eyebrow"><span className="hero-signal" aria-hidden="true" />MINIMUM SPANNING TREE</p><h1>같은 목표,<span>다른 선택.</span></h1>
-      <p className="intro-copy">가벼운 간선을 더하는 <strong>Kruskal</strong>과 무거운 간선을 지우는 <strong>Reverse-Delete</strong>.<br />선택과 이유를 따라가며 최소 신장 트리를 비교해 보세요.</p>
+      <p className="intro-copy">이번 과제에서는 같은 그래프에 <strong>Kruskal</strong>과 <strong>Reverse-Delete</strong>를 적용했습니다.<br />간선을 더할 때의 사이클 판단과 뺄 때의 연결성 판단이 어떻게 다른지, 최종 결과와 판단 비용을 비교합니다.</p>
       <nav className="section-links" aria-label="페이지 탐색"><a href="#comparison">Algorithm Lab 탐색하기</a><a href="#theory">수도코드 / 복잡도</a></nav>
       <aside className="hero-input" aria-label="공통 입력 그래프">
         <dl className="hero-stats">

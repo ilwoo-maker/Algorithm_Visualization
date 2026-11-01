@@ -150,15 +150,14 @@ describe('independent snapshot playback', () => {
   it('keeps the sample final-result comparison independent of either current panel step', async () => {
     const user = userEvent.setup()
     render(<App />)
-    await user.click(screen.getByRole('tab', { name: '최종 실행 결과 비교' }))
     const summary = within(screen.getByRole('region', { name: '샘플 그래프의 최종 실행 결과' }))
     const verifySummary = () => {
-      const table = within(summary.getByRole('table'))
-      expect(table.getByRole('row', { name: '최종 MST AB, BC, BD, BE AB, BC, BD, BE' })).toBeDefined()
-      expect(table.getByRole('row', { name: '최종 가중치 8 8' })).toBeDefined()
+      const table = within(summary.getByRole('table', { name: '같은 문제를 해결하는 두 알고리즘의 실행 결과와 핵심 비용' }))
+      expect(table.getByRole('row', { name: /^최종 결과.*AB, BC, BD, BE.*AB, BC, BD, BE/ })).toBeDefined()
+      expect(table.getByRole('row', { name: /^최종 결과 가중치 8.*가중치 8/ })).toBeDefined()
       expect(table.getByRole('row', { name: '접근 방식 상향식 · 작은 이음선부터 추가 하향식 · 큰 이음선부터 삭제 시도' })).toBeDefined()
-      expect(table.getByRole('row', { name: '핵심 판단 사이클 발생 여부 연결성 유지 여부' })).toBeDefined()
-      expect(summary.getByText(/이음선 집합이 달라질 수/)).toBeDefined()
+      expect(summary.getByRole('row', { name: '핵심 판단 추가하면 사이클이 생기는가? 제거해도 연결이 유지되는가?' })).toBeDefined()
+      expect(summary.getByText(/이음선 집합은 달라질 수/)).toBeDefined()
     }
     verifySummary()
     const k = within(screen.getByRole('region', { name: 'Kruskal' }))

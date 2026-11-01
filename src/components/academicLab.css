@@ -22,9 +22,6 @@
 .academic-concept .concept-log-step { color: #8ea5c1; font-size: 9px; letter-spacing: .8px; }
 .academic-concept .concept-terminal p { margin: 8px 0; color: #deebf8; font: inherit; }
 .academic-concept .concept-terminal .concept-log-why { color: #a8bed8; padding-left: 11px; border-left: 2px solid var(--concept-border); }
-.academic-concept .concept-log-footer { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 15px; padding-top: 12px; border-top: 1px solid #ffffff0d; }
-.academic-concept .concept-log-footer code { color: var(--concept-accent); font: 600 11px/1.7 ui-monospace, Consolas, monospace; }
-.academic-concept .concept-log-footer > span { color: #91a8c3; font-size: 10px; }
 
 .academic-lab .comparison-heading { gap: 16px; margin-bottom: 22px; }
 .academic-lab .comparison-heading h2 { color: #edf4ff; font-size: clamp(20px, 2vw, 25px); }
@@ -85,6 +82,10 @@
 .academic-lab .why-reasons { margin: 0; padding-left: 18px; list-style: disc; color: #c5d5e9; }
 .academic-lab .why-reasons li { font-size: 13px; line-height: 1.95; padding-left: 3px; overflow-wrap: anywhere; word-break: keep-all; }
 .academic-lab .why-reasons li::marker { color: var(--panel-accent); }
+.academic-lab .why-block p { margin: 0; color: #c5d5e9; font-size: 13px; line-height: 1.95; overflow-wrap: anywhere; }
+.academic-lab .why-block .step-context { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--panel-line); }
+.academic-lab .explanation-block p,
+.academic-lab .why-reasons li { font-family: inherit; font-size: 13px; font-weight: 400; line-height: 1.95; letter-spacing: normal; }
 .academic-lab .completion-label, .academic-lab .termination-note { background: #103229; color: #b8f4d9; border: 1px solid #2a6a56; border-radius: 10px; font-size: 12px; line-height: 1.9; }
 .academic-lab .disconnection-note { background: #392b18; color: #ffdc9e; border-color: #926e36; border-radius: 10px; font-size: 12px; line-height: 1.9; }
 .academic-lab .metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; padding: 0; border: 0; margin-block: 21px; }

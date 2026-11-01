@@ -4,6 +4,8 @@ import { GraphView } from './GraphView'
 import { ACTION_NAMES, EDGE_STYLES } from './graphPresentation'
 import { useAlgorithmPlayback } from '../animation/useEdgeTransition'
 import './academicLab.css'
+import { stepExplanation } from './stepExplanation'
+import './completionAchievement.css'
 
 export function AlgorithmPanel({ run, visible = true }: { run: MstRun; visible?: boolean }) {
   const weight = useRef<HTMLOutputElement>(null)
@@ -13,12 +15,19 @@ export function AlgorithmPanel({ run, visible = true }: { run: MstRun; visible?:
   const { pause, status } = playback
   useLayoutEffect(() => { if (!visible) pause() }, [visible, status, pause])
   const { index, snapshot, target } = playback
+  const explanation = stepExplanation(run, snapshot)
   const requestedIndex = target?.index ?? index
   const id = useId()
   const isKruskal = run.algorithm === 'kruskal'
   const name = isKruskal ? 'Kruskal' : 'Reverse-Delete'
   const lastIndex = run.snapshots.length - 1
   const isFinal = index === lastIndex
+  const vertexCount = snapshot.components.flat().length
+  const isCompleted = isFinal && snapshot.components.length === 1 && snapshot.activeEdgeIds.length === vertexCount - 1
+  const inspectedCount = run.snapshots.slice(0, index + 1).filter(step =>
+    isKruskal ? step.action === 'accept' || step.action === 'reject' : step.action === 'try-remove').length
+  const uninspected = snapshot.edges.filter(edge => edge.status === 'pending')
+  const isEarlyTermination = isCompleted && isKruskal && uninspected.length > 0 && inspectedCount < snapshot.edges.length
   const current = snapshot.edges.find((edge) => edge.id === snapshot.edgeId)
   const disconnected = !isKruskal && snapshot.components.length > 1
   const statuses: EdgeStatus[] = isKruskal
@@ -26,10 +35,15 @@ export function AlgorithmPanel({ run, visible = true }: { run: MstRun; visible?:
     : ['present', 'temporarily-removed', 'removed', 'kept']
 
   return (
-    <section className={`algorithm-panel ${isKruskal ? 'kruskal-panel' : 'reverse-panel'}`} aria-labelledby={`${id}-title`}>
+    <section className={`algorithm-panel ${isKruskal ? 'kruskal-panel' : 'reverse-panel'}${isCompleted ? ' is-completed' : ''}${isEarlyTermination ? ' is-early-termination' : ''}${status === 'paused' || !visible ? ' completion-paused' : ''}`} aria-labelledby={`${id}-title`}>
+      {isCompleted && <span className="completion-border" aria-hidden="true" />}
       <header className="panel-header">
         <div className="panel-title-row"><span className="algorithm-number" aria-hidden="true">{isKruskal ? '01' : '02'}</span><h3 id={`${id}-title`}>{name}</h3><span className="approach-tag">{isKruskal ? '간선을 더하며' : '간선을 지우며'}</span></div>
         <p>{isKruskal ? '가벼운 간선부터 선택 · Union-Find' : '무거운 간선부터 삭제 시도 · BFS 연결성 검사'}</p>
+        {isCompleted && <p className="achievement-badge" role="status" aria-label="완료 성취">
+          <span aria-hidden="true">{isEarlyTermination ? '⚡' : '✓'}</span>{' '}
+          {isKruskal ? `${isEarlyTermination ? '조기 종료' : '탐색 완료'} · ${inspectedCount}회 검사로 MST 완성` : `탐색 완료 · 전체 ${inspectedCount}개 이음선 검사`}
+        </p>}
       </header>
 
       <div className="panel-playback">
@@ -77,13 +91,17 @@ export function AlgorithmPanel({ run, visible = true }: { run: MstRun; visible?:
       <div className="panel-content">
         <div className="explanation" role="group" aria-label="단계별 동작과 판단 근거" aria-live="polite" aria-atomic="true">
           <div className="explanation-block what-block"><span className="inspector-code" aria-hidden="true">WHAT / ACTION</span><h4><span className="explanation-dot" aria-hidden="true" />무엇을 했나요?</h4><p>{snapshot.what}</p></div>
-          <div className="explanation-block why-block"><span className="inspector-code" aria-hidden="true">WHY / DECISION</span><h4><span className="explanation-dot" aria-hidden="true" />왜 그런가요?</h4><ul className="why-reasons"><li>{snapshot.why}</li></ul></div>
-          {isFinal && <p className="completion-label"><span aria-hidden="true">✓</span> <span>최종 MST 완성</span></p>}
-          {isKruskal && isFinal && <p className="termination-note" role="note" aria-label="종료 조건 안내">
-            정점 {snapshot.components.flat().length}개를 연결하는 신장 트리에 필요한 간선 {snapshot.activeEdgeIds.length}개를 선택했습니다.
-            {' '}따라서 MST가 완성되어 알고리즘을 종료합니다.
-            {snapshot.edges.some((edge) => edge.status === 'pending') && <>{' '}{snapshot.edges.filter((edge) => edge.status === 'pending').map((edge) => edge.name).join(', ')}는 검사하지 않습니다.</>}
-          </p>}
+          <div className="explanation-block why-block"><span className="inspector-code" aria-hidden="true">WHY / DECISION</span><h4><span className="explanation-dot" aria-hidden="true" />왜 그런가요?</h4><ul className="why-reasons"><li>{snapshot.why}</li></ul>
+            {explanation && <p className="step-context">{explanation}</p>}
+          </div>
+          {isCompleted && <div className="achievement-summary" role="group" aria-label="완료 결과 요약">
+            <p className="completion-label"><span aria-hidden="true">✓</span> <span>최종 MST 완성</span><strong>최소 비용 {snapshot.totalWeight}</strong></p>
+            {isKruskal ? <p className="termination-note" role="note" aria-label="종료 조건 안내">
+              정점 {vertexCount}개를 연결하는 신장 트리에 필요한 간선 {snapshot.activeEdgeIds.length}개를 선택했습니다.
+              {' '}따라서 MST가 완성되어 알고리즘을 종료합니다.
+              {uninspected.length > 0 && <>{' '}{uninspected.map(edge => edge.name).join(', ')}는 검사하지 않습니다.</>}
+            </p> : <p>모든 이음선의 임시 제거와 연결성 검사를 마쳤습니다. 연결을 끊는 이음선은 복구하여 최종 MST를 유지합니다.</p>}
+          </div>}
           {disconnected && <p className="disconnection-note" role="note" aria-label="임시 단절 안내">임시 제거로 연결 요소가 {snapshot.components.length}개로 나뉘었습니다. 아래 가중치는 이 상태의 합이며 최종 MST 가중치가 아닙니다. 다음 단계에서 삭제 또는 복구 판정을 확인하세요.</p>}
         </div>
 

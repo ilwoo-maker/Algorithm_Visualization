@@ -1,0 +1,87 @@
+@property --mst-completion-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.algorithm-panel.is-completed {
+  --completion-rgb: 16, 185, 129;
+  position: relative;
+  isolation: isolate;
+  border-color: rgba(var(--completion-rgb), .65);
+  box-shadow: 0 0 16px rgba(var(--completion-rgb), .16), inset 0 0 0 1px rgba(var(--completion-rgb), .12);
+}
+.algorithm-panel.is-completed.reverse-panel {
+  --completion-rgb: 56, 189, 248;
+  animation: mst-completion-illuminate .8s ease-out;
+}
+.algorithm-panel.is-early-termination {
+  animation: mst-completion-pulse 1.1s ease-in-out .85s 2;
+}
+.completion-border {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 2px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: rgba(var(--completion-rgb), .45);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.is-early-termination > .completion-border {
+  background: conic-gradient(from var(--mst-completion-angle), transparent 0deg 260deg, rgba(var(--completion-rgb), .15) 290deg, rgba(var(--completion-rgb), .85) 330deg, #d1fae5 350deg, transparent 360deg);
+  animation: mst-completion-flow .85s linear forwards;
+}
+.algorithm-panel .panel-header .achievement-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  margin: 12px 0 0;
+  padding: 7px 10px;
+  border: 1px solid rgba(var(--completion-rgb), .5);
+  border-radius: 10px;
+  background: rgba(var(--completion-rgb), .14);
+  color: #a7f3d0;
+  font: 600 12px/1.8 'Pretendard', 'Noto Sans KR', 'Segoe UI', sans-serif;
+  overflow-wrap: anywhere;
+}
+.reverse-panel .panel-header .achievement-badge { color: #bae6fd; }
+.achievement-summary {
+  margin: 0 0 16px;
+  padding: 15px;
+  border: 1px solid rgba(var(--completion-rgb), .35);
+  border-radius: 12px;
+  background: rgba(var(--completion-rgb), .07);
+}
+.achievement-summary p { margin: 0 0 8px; color: #d5e7ed; font: inherit; font-size: 13px; line-height: 1.95; overflow-wrap: anywhere; }
+.achievement-summary p:last-child { margin-bottom: 0; }
+.achievement-summary strong { color: #a7f3d0; }
+.reverse-panel .achievement-summary strong { color: #bae6fd; }
+.academic-lab .achievement-summary .completion-label { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; margin: 0 0 10px; padding: 0; border: 0; background: transparent; }
+.academic-lab .achievement-summary .completion-label strong { margin-left: auto; }
+.academic-lab .achievement-summary .termination-note { margin: 0; padding: 0; border: 0; background: transparent; color: #d5e7ed; font-size: 13px; }
+.algorithm-panel.completion-paused,
+.completion-paused > .completion-border { animation-play-state: paused; }
+
+@keyframes mst-completion-flow {
+  from { --mst-completion-angle: 0deg; opacity: 1; }
+  90% { opacity: 1; }
+  to { --mst-completion-angle: 360deg; opacity: 0; }
+}
+@keyframes mst-completion-pulse {
+  0%, 100% { box-shadow: 0 0 16px rgba(var(--completion-rgb), .16), inset 0 0 0 1px rgba(var(--completion-rgb), .12); }
+  50% { box-shadow: 0 0 25px rgba(var(--completion-rgb), .4), inset 0 0 10px rgba(var(--completion-rgb), .12); }
+}
+@keyframes mst-completion-illuminate {
+  from { border-color: rgba(var(--completion-rgb), .15); box-shadow: none; }
+  to { border-color: rgba(var(--completion-rgb), .65); box-shadow: 0 0 16px rgba(var(--completion-rgb), .16); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .algorithm-panel.is-completed,
+  .algorithm-panel.is-completed > .completion-border { animation: none; }
+  .is-early-termination > .completion-border { background: rgba(var(--completion-rgb), .3); }
+}

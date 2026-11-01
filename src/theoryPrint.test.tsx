@@ -18,9 +18,9 @@ it('shows authoritative Definition, actual procedures and operation-based comple
   expect(theory.getByRole('heading', { name: '기본 연산' })).toBeDefined()
 })
 it('provides the complete comparison including termination and recording costs', () => {
-  render(<App />); fireEvent.click(screen.getByRole('tab', { name: '최종 실행 결과 비교' })); const summary = within(screen.getByRole('region', { name: '샘플 그래프의 최종 실행 결과' }))
+  render(<App />); const summary = within(screen.getByRole('region', { name: '샘플 그래프의 최종 실행 결과' }))
   for (const name of ['검사 순서', '이음선 처리', '종료 조건', '최악 시간복잡도', '작업 공간', '전체 기록 공간']) expect(summary.getByRole('rowheader', { name })).toBeDefined()
-  expect(summary.getByRole('row', { name: '최종 가중치 8 8' })).toBeDefined()
+  expect(summary.getByRole('row', { name: /^최종 결과 가중치 8.*가중치 8/ })).toBeDefined()
 })
 it('keeps both print results available with a hidden mobile panel and never changes Lab selection on print', () => {
   vi.stubGlobal('matchMedia', (query: string) => ({ matches: query.includes('max-width'), addEventListener() {}, removeEventListener() {} }))
@@ -30,8 +30,8 @@ it('keeps both print results available with a hidden mobile panel and never chan
   fireEvent.click(screen.getByRole('tab', { name: 'Kruskal' }))
   fireEvent(window, new Event('beforeprint'))
   const table = within(screen.getByRole('region', { name: '샘플 그래프의 최종 실행 결과' }))
-  expect(table.getByRole('row', { name: '최종 MST AB, BC, BD, BE AB, BC, BD, BE' })).toBeDefined()
-  expect(table.getByRole('row', { name: '최종 가중치 8 8' })).toBeDefined()
+  expect(table.getByRole('row', { name: /^최종 결과.*AB, BC, BD, BE.*AB, BC, BD, BE/ })).toBeDefined()
+  expect(table.getByRole('row', { name: /^최종 결과 가중치 8.*가중치 8/ })).toBeDefined()
   fireEvent.click(screen.getByRole('tab', { name: 'Reverse-Delete' }))
   expect(right.getByRole<HTMLSelectElement>('combobox').value).toBe('5')
   expect(screen.getByRole('region', { name: '이론과 비교' }).querySelectorAll('pre').length).toBeGreaterThanOrEqual(4)
