@@ -144,11 +144,13 @@ Reverse-Delete(G):
 
 | 제출·공개 자료 | 현재 상태 |
 |---|---|
-| 공개 웹사이트 | 배포 준비 중 |
+| 공개 웹사이트 | [Algorithm Visualization](https://algorithm-visualization-snowy.vercel.app) |
 | 시연 영상 | 제작 예정, 1~3분 |
 | 제출 PDF | 제작 예정, 핵심 캡처와 웹사이트·영상 링크 포함 |
 
-배포·촬영이 완료되면 위 표에 실제 주소를 추가합니다. 로컬 개발 주소는 공개 배포 주소가 아닙니다.
+웹사이트는 검증된 `dev` 브랜치 최신 상태를 Vercel CLI로 직접 배포했습니다. 현재 Git Push에 따른 자동 배포는 연결하지 않았습니다. 영상 제작 후 해당 링크도 추가합니다.
+
+배포 설정은 Vite, Node.js 24.x, 설치 `npm ci`, 빌드 `npm run build`, 출력 `dist`입니다. 공개 주소의 HTML·JS·CSS·favicon 응답을 확인했으며, 실제 화면 조작과 최종 모바일·접근성 검수는 별도입니다.
 
 ## 7. 구현과 검증
 
@@ -165,7 +167,7 @@ Reverse-Delete(G):
 
 화면은 React·SVG·Canvas·GSAP으로 구성했고, Vitest·Testing Library로 로직과 UI를 검증합니다.
 
-**2026-11-01 로컬 코드 검증:** 테스트 22개 파일 **299개 PASS**, 프로덕션 빌드·린트·공백 검사 PASS. 현재 README 작성 전 구현 커밋은 `9b1bfd7`입니다. 자동 검사에서는 전체 단계의 상태·가중치·연결 요소·설명 일치, 재생 제어·취소, 두 패널의 독립성, 완료 상태, 이론 탐색과 인쇄 상태 복구 등을 확인했습니다.
+**2026-11-13 로컬 코드 검증:** 테스트 22개 파일 **300개 PASS**, 프로덕션 빌드·린트·공백 검사 PASS. 자동 검사에서는 전체 단계의 상태·가중치·연결 요소·설명 일치, 재생 제어·취소, 두 패널의 독립성·동시 재생, 완료 상태, 이론 탐색과 인쇄 상태 복구 등을 확인했습니다.
 
 GitHub Actions는 `dev` Push와 `main` 대상 Pull Request에서 Node.js 24로 `npm ci → npm test → npm run build → npm run lint`를 실행하도록 구성되어 있습니다. **이 로컬 변경의 원격 CI 결과는 아직 확인하지 않았습니다.**
 

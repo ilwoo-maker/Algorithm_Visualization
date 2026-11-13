@@ -1,21 +1,34 @@
-import { useId, useLayoutEffect, useRef } from 'react'
+import { useId, useImperativeHandle, useLayoutEffect, useRef } from 'react'
+import type { Ref } from 'react'
 import type { EdgeStatus, MstRun } from '../algorithms/types'
 import { GraphView } from './GraphView'
 import { ACTION_NAMES, EDGE_STYLES } from './graphPresentation'
 import { useAlgorithmPlayback } from '../animation/useEdgeTransition'
 import './academicLab.css'
-import { stepExplanation } from './stepExplanation'
+import { snapshotStepCopy, stepExplanation } from './stepExplanation'
 import './completionAchievement.css'
 
-export function AlgorithmPanel({ run, visible = true }: { run: MstRun; visible?: boolean }) {
+export interface AlgorithmPanelHandle {
+  play: () => void
+  pause: () => void
+  restart: () => void
+}
+
+export function AlgorithmPanel({ run, visible = true, ref }: { run: MstRun; visible?: boolean; ref?: Ref<AlgorithmPanelHandle> }) {
   const weight = useRef<HTMLOutputElement>(null)
   const svg = useRef<SVGSVGElement>(null)
   const notice = useRef<HTMLParagraphElement>(null)
   const playback = useAlgorithmPlayback(run, svg, weight, notice)
+  useImperativeHandle(ref, () => ({
+    play: playback.play,
+    pause: playback.pause,
+    restart: playback.restart,
+  }), [playback.play, playback.pause, playback.restart])
   const { pause, status } = playback
   useLayoutEffect(() => { if (!visible) pause() }, [visible, status, pause])
   const { index, snapshot, target } = playback
-  const explanation = stepExplanation(run, snapshot)
+  const copy = snapshotStepCopy(run, snapshot)
+  const explanation = copy ? undefined : stepExplanation(run, snapshot)
   const requestedIndex = target?.index ?? index
   const id = useId()
   const isKruskal = run.algorithm === 'kruskal'
@@ -38,12 +51,19 @@ export function AlgorithmPanel({ run, visible = true }: { run: MstRun; visible?:
     <section className={`algorithm-panel ${isKruskal ? 'kruskal-panel' : 'reverse-panel'}${isCompleted ? ' is-completed' : ''}${isEarlyTermination ? ' is-early-termination' : ''}${status === 'paused' || !visible ? ' completion-paused' : ''}`} aria-labelledby={`${id}-title`}>
       {isCompleted && <span className="completion-border" aria-hidden="true" />}
       <header className="panel-header">
-        <div className="panel-title-row"><span className="algorithm-number" aria-hidden="true">{isKruskal ? '01' : '02'}</span><h3 id={`${id}-title`}>{name}</h3><span className="approach-tag">{isKruskal ? '간선을 더하며' : '간선을 지우며'}</span></div>
+        <div className="panel-title-row">
+          <span className="algorithm-number" aria-hidden="true">{isKruskal ? '01' : '02'}</span>
+          <h3 id={`${id}-title`}>{name}</h3>
+          {isCompleted ? (
+            <span className="achievement-badge" role="status" aria-label="완료 성취">
+              <span aria-hidden="true">{isEarlyTermination ? '⚡' : '✓'}</span>{' '}
+              {isKruskal ? `${isEarlyTermination ? '조기 종료' : '탐색 완료'} · ${inspectedCount}회 검사로 MST 완성` : `탐색 완료 · 전체 ${inspectedCount}개 이음선 검사`}
+            </span>
+          ) : (
+            <span className="approach-tag">{isKruskal ? '간선을 더하며' : '간선을 지우며'}</span>
+          )}
+        </div>
         <p>{isKruskal ? '가벼운 간선부터 선택 · Union-Find' : '무거운 간선부터 삭제 시도 · BFS 연결성 검사'}</p>
-        {isCompleted && <p className="achievement-badge" role="status" aria-label="완료 성취">
-          <span aria-hidden="true">{isEarlyTermination ? '⚡' : '✓'}</span>{' '}
-          {isKruskal ? `${isEarlyTermination ? '조기 종료' : '탐색 완료'} · ${inspectedCount}회 검사로 MST 완성` : `탐색 완료 · 전체 ${inspectedCount}개 이음선 검사`}
-        </p>}
       </header>
 
       <div className="panel-playback">
@@ -76,8 +96,8 @@ export function AlgorithmPanel({ run, visible = true }: { run: MstRun; visible?:
           <div className="speed-controls" role="group" aria-label="재생 속도">
             {([0.5, 1, 2] as const).map(speed => <button key={speed} type="button" aria-label={`${speed}배속`} aria-pressed={playback.speed === speed} onClick={() => playback.setSpeed(speed)}>{speed}×</button>)}
           </div>
+          <p className="playback-status" role="status">{playback.status === 'playing' ? '자동 재생 중' : playback.status === 'paused' ? '일시정지됨' : playback.status === 'finished' ? '재생 완료' : '재생 대기'} · {playback.speed}배속</p>
         </div>
-        <p className="playback-status" role="status">{playback.status === 'playing' ? '자동 재생 중' : playback.status === 'paused' ? '일시정지됨 · 계속 재생을 눌러 이어가세요' : playback.status === 'finished' ? '재생 완료' : '재생 대기'} · {playback.speed}배속</p>
       </div>
 
       <div className="graph-area">
@@ -90,19 +110,18 @@ export function AlgorithmPanel({ run, visible = true }: { run: MstRun; visible?:
 
       <div className="panel-content">
         <div className="explanation" role="group" aria-label="단계별 동작과 판단 근거" aria-live="polite" aria-atomic="true">
-          <div className="explanation-block what-block"><span className="inspector-code" aria-hidden="true">WHAT / ACTION</span><h4><span className="explanation-dot" aria-hidden="true" />무엇을 했나요?</h4><p>{snapshot.what}</p></div>
-          <div className="explanation-block why-block"><span className="inspector-code" aria-hidden="true">WHY / DECISION</span><h4><span className="explanation-dot" aria-hidden="true" />왜 그런가요?</h4><ul className="why-reasons"><li>{snapshot.why}</li></ul>
+          <div className="explanation-block what-block"><span className="inspector-code" aria-hidden="true">WHAT / ACTION</span><h4><span className="explanation-dot" aria-hidden="true" />무엇을 했나요?</h4><p>{copy?.what ?? snapshot.what}</p></div>
+          <div className="explanation-block why-block"><span className="inspector-code" aria-hidden="true">WHY / DECISION</span><h4><span className="explanation-dot" aria-hidden="true" />왜 그런가요?</h4><ul className="why-reasons"><li>{copy?.why ?? snapshot.why}</li></ul>
             {explanation && <p className="step-context">{explanation}</p>}
           </div>
           {isCompleted && <div className="achievement-summary" role="group" aria-label="완료 결과 요약">
             <p className="completion-label"><span aria-hidden="true">✓</span> <span>최종 MST 완성</span><strong>최소 비용 {snapshot.totalWeight}</strong></p>
             {isKruskal ? <p className="termination-note" role="note" aria-label="종료 조건 안내">
-              정점 {vertexCount}개를 연결하는 신장 트리에 필요한 간선 {snapshot.activeEdgeIds.length}개를 선택했습니다.
-              {' '}따라서 MST가 완성되어 알고리즘을 종료합니다.
-              {uninspected.length > 0 && <>{' '}{uninspected.map(edge => edge.name).join(', ')}는 검사하지 않습니다.</>}
-            </p> : <p>모든 이음선의 임시 제거와 연결성 검사를 마쳤습니다. 연결을 끊는 이음선은 복구하여 최종 MST를 유지합니다.</p>}
+              정점 {vertexCount}개를 연결하기 위해 총 {inspectedCount}개 간선을 검사해 간선 {snapshot.activeEdgeIds.length}개를 선택했다. 최종 가중치 합은 {snapshot.totalWeight}이다.
+              {uninspected.length > 0 && <>{' '}{uninspected.map(edge => edge.name).join(', ')}는 검사하지 않았으며, 사이클 때문에 기각한 간선과는 구분된다.</>}
+            </p> : <p>간선 {inspectedCount}개를 모두 검사했다. {snapshot.edges.filter(edge => edge.status === 'removed').map(edge => edge.name).join('·')}는 삭제하고, {snapshot.edges.filter(edge => edge.status === 'kept').map(edge => edge.name).join('·')}는 제거하면 연결이 끊어져 복구했다. 최종 간선은 {snapshot.activeEdgeIds.length}개이며 가중치 합은 {snapshot.totalWeight}이다.</p>}
           </div>}
-          {disconnected && <p className="disconnection-note" role="note" aria-label="임시 단절 안내">임시 제거로 연결 요소가 {snapshot.components.length}개로 나뉘었습니다. 아래 가중치는 이 상태의 합이며 최종 MST 가중치가 아닙니다. 다음 단계에서 삭제 또는 복구 판정을 확인하세요.</p>}
+          {disconnected && <p className="disconnection-note" role="note" aria-label="임시 단절 안내">임시 제거로 연결 요소가 {snapshot.components.length}개로 나뉘었다. 아래 가중치는 이 상태의 합이며 최종 MST 가중치가 아니다. 다음 단계에서 삭제 또는 복구 판정을 확인한다.</p>}
         </div>
 
         <div className="metrics" role="group" aria-label="현재 스냅샷 수치">
@@ -112,7 +131,7 @@ export function AlgorithmPanel({ run, visible = true }: { run: MstRun; visible?:
         </div>
 
         <div className="components-info"><h4>연결 요소 구성</h4><ul aria-label="연결 요소">{snapshot.components.map((group, groupIndex) => <li key={groupIndex}>{group.join(', ')}</li>)}</ul></div>
-        <details className="edge-details" open>
+        <details className="edge-details">
           <summary>간선별 상태 <span>{snapshot.edges.length}개</span></summary>
           <table><caption className="sr-only">{name} 현재 간선별 가중치와 상태</caption><thead><tr><th scope="col">간선</th><th scope="col">가중치</th><th scope="col">상태</th></tr></thead><tbody>
             {snapshot.edges.map((edge) => <tr key={edge.id} className={edge.id === snapshot.edgeId ? 'current-row' : undefined}><th scope="row">{edge.name}</th><td>{edge.weight}</td><td><span className={`edge-status status-${edge.status}`}>{EDGE_STYLES[edge.status].label}</span>{edge.id === snapshot.edgeId && <span className="current-row-label">현재</span>}</td></tr>)}

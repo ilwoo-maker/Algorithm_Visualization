@@ -205,7 +205,7 @@ it('hides all decoration from assistive technology and explains that the light i
   const decorations = svg.querySelectorAll('.edge-effect, .edge-streak, .edge-streak-glow, .light-head, .vertex-wave, .stage-flash')
   expect(decorations.length).toBeGreaterThan(0)
   for (const decoration of decorations) expect(decoration.getAttribute('aria-hidden')).toBe('true')
-  expect(panel.getByText(/간선의 방향을 뜻하지 않습니다/)).toBeDefined()
+  expect(panel.getByText(/간선의 방향을 뜻하지 않는다/)).toBeDefined()
   expect(within(svg).getAllByRole('group', { name: /^간선 / })).toHaveLength(7)
 })
 

@@ -4,6 +4,7 @@ import { act, cleanup, render, screen, within } from '@testing-library/react'
 import { gsap } from 'gsap'
 import userEvent from '@testing-library/user-event'
 import App from './App'
+import { snapshotStepCopy } from './components/stepExplanation'
 import { ASSIGNMENT_GRAPH } from './algorithms/fixtures'
 import { kruskal } from './algorithms/kruskal'
 import { reverseDelete } from './algorithms/reverseDelete'
@@ -68,8 +69,8 @@ describe('independent snapshot playback', () => {
     const select = panel.getByRole('combobox', { name: '단계 선택' })
     for (const step of result.value.snapshots) {
       await user.selectOptions(select, String(step.index))
-      expect(panel.getByText(step.what)).toBeDefined()
-      expect(panel.getByText(step.why)).toBeDefined()
+      expect(panel.getByText(snapshotStepCopy(result.value, step)?.what ?? step.what)).toBeDefined()
+      expect(panel.getByText(snapshotStepCopy(result.value, step)?.why ?? step.why)).toBeDefined()
       expect(panel.getByLabelText('현재 활성 간선 가중치 합').textContent).toBe(String(step.totalWeight))
       expect(panel.getByLabelText('현재 활성 간선 수').textContent).toBe(String(step.activeEdgeIds.length))
       const groups = within(panel.getByRole('list', { name: '연결 요소' })).getAllByRole('listitem')
@@ -140,7 +141,7 @@ describe('independent snapshot playback', () => {
     expect(note).toContain('정점 5개')
     expect(note).toContain('간선 4개')
     expect(note).toContain('CD, DE')
-    expect(note).toContain('검사하지 않습니다')
+    expect(note).toContain('검사하지 않았으며')
     for (const name of ['CD', 'DE']) expect(panel.getByRole('row', { name: new RegExp(`^${name} [57] 미검사`) })).toBeDefined()
     await user.click(panel.getByRole('button', { name: '이전' }))
     expect(panel.queryByRole('note', { name: '종료 조건 안내' })).toBeNull()
@@ -157,7 +158,7 @@ describe('independent snapshot playback', () => {
       expect(table.getByRole('row', { name: /^최종 결과 가중치 8.*가중치 8/ })).toBeDefined()
       expect(table.getByRole('row', { name: '접근 방식 상향식 · 작은 이음선부터 추가 하향식 · 큰 이음선부터 삭제 시도' })).toBeDefined()
       expect(summary.getByRole('row', { name: '핵심 판단 추가하면 사이클이 생기는가? 제거해도 연결이 유지되는가?' })).toBeDefined()
-      expect(summary.getByText(/이음선 집합은 달라질 수/)).toBeDefined()
+      expect(summary.queryByText(/이음선 집합은 달라질 수/)).toBeNull()
     }
     verifySummary()
     const k = within(screen.getByRole('region', { name: 'Kruskal' }))

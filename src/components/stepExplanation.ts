@@ -16,7 +16,7 @@ export function stepExplanation(run: MstRun, snapshot: Snapshot): string | undef
   const previous = run.snapshots[snapshot.index - 1]
   if (snapshot.action === 'initialize') {
     return run.algorithm === 'kruskal'
-      ? '처음에는 선택한 간선이 없으므로 각 정점이 따로 떨어져 있습니다. 작은 가중치부터 검사하되, 이미 연결된 두 정점을 다시 잇는 간선은 제외하는 과정을 기록했습니다.'
+      ? '아직 선택한 간선이 없어 연결 요소는 5개입니다. 가중치가 가장 작은 BC와 BD 중 이름순으로 BC부터 검사합니다.'
       : '처음에는 모든 간선이 있어 연결은 확보되어 있지만 사이클도 남아 있습니다. 큰 가중치부터 제거를 시도하며, 연결을 끊지 않고 줄일 수 있는 비용을 확인합니다.'
   }
   if (run.algorithm === 'kruskal' && snapshot.action === 'accept') {
@@ -67,4 +67,45 @@ export function stepExplanation(run: MstRun, snapshot: Snapshot): string | undef
     return `BE를 복구하면 고립되었던 E가 다시 연결되고 가중치 합이 ${previous.totalWeight}에서 ${snapshot.totalWeight}로 돌아옵니다. 비용이 늘어도 모든 정점을 연결하는 조건을 지켜야 합니다. 아직 다른 간선의 검사가 남아 있으므로, 이 값은 최종 MST 가중치가 아닙니다.`
   }
   return undefined
+}
+
+/** Presentation copy for the verified assignment snapshots; never changes the run. */
+export function kruskalStepCopy(run: MstRun, snapshot: Snapshot): { what: string; why: string } | undefined {
+  if (run.algorithm !== 'kruskal' || !stepExplanation(run, snapshot)) return undefined
+  const copy = [
+    { what: '선택한 간선 없이 시작한다. 각 정점은 따로 떨어져 있어 연결 요소는 5개이다.', why: '사이클 없이 모든 정점을 연결해야 한다. 가중치가 작은 간선부터 검사하고, 서로 다른 연결 요소를 잇는 간선만 선택한다. BC와 BD의 가중치는 모두 1이므로 이름순으로 BC부터 검사한다.' },
+    { what: 'BC(가중치 1)를 선택한다.', why: 'B와 C는 아직 연결되어 있지 않다. BC를 추가해도 사이클이 생기지 않으므로 선택한다. B와 C가 하나의 연결 요소가 되고, 가중치 합은 1이 된다.' },
+    { what: 'BD(가중치 1)를 선택한다.', why: 'B는 C와 연결되어 있지만 D는 따로 남아 있다. BD를 추가하면 D를 기존 B·C 집합에 연결할 수 있고, 사이클도 생기지 않는다. 가중치 합은 2가 된다.' },
+    { what: 'AB(가중치 2)를 선택한다.', why: 'A는 아직 B·C·D와 연결되어 있지 않다. AB를 선택하면 네 정점이 하나로 연결되고, 가중치 합은 4가 된다. E가 따로 남아 있으므로 검사를 계속한다.' },
+    { what: 'AC(가중치 3)는 선택하지 않는다.', why: '이미 AB와 BC를 선택했으므로 A에서 C까지 A–B–C 경로가 있다. AC까지 추가하면 A–B–C–A 사이클이 생긴다. BE보다 가중치가 작더라도 선택할 수 없으며, 가중치 합은 4로 유지된다.' },
+    { what: 'BE(가중치 4)를 선택한다. 가중치 합은 8이 된다.', why: 'E만 따로 남아 있으므로 BE를 추가해도 사이클이 생기지 않는다. 이 간선을 선택하면 모든 정점이 연결되고, 선택한 간선 수도 n−1=4개가 된다. 따라서 MST가 완성되어 종료한다.' },
+  ]
+  return copy[snapshot.index]
+}
+
+/** Read-only captions for the assignment's existing Reverse-Delete snapshots. */
+export function reverseDeleteStepCopy(run: MstRun, snapshot: Snapshot): { what: string; why: string } | undefined {
+  if (run.algorithm !== 'reverse-delete' || !stepExplanation(run, snapshot)) return undefined
+  const copy = [
+    { what: '간선 7개가 모두 있는 상태에서 시작한다. 가중치 합은 23이다.', why: '모든 정점이 연결되어 있지만 사이클도 남아 있다. 가중치가 큰 간선부터 제거를 시도하고, 제거한 뒤에도 연결이 유지되는지 BFS로 확인한다.' },
+    { what: 'DE(가중치 7)를 임시로 제거한다. 가중치 합은 16이 된다.', why: 'DE를 빼도 D–B–E 경로가 남아 있다. BFS 결과에서도 모든 정점이 하나로 연결되어 있으므로, 다음 단계에서 삭제를 확정할 수 있다.' },
+    { what: 'DE의 삭제를 확정한다.', why: '직전 검사에서 DE 없이도 연결이 유지되는 것을 확인했다. 임시 제거한 상태를 그대로 유지하므로 가중치 합은 16이다.' },
+    { what: 'CD(가중치 5)를 임시로 제거한다. 가중치 합은 11이 된다.', why: 'C와 D 사이에는 C–B–D 경로가 남아 있다. CD를 제거해도 모든 정점이 연결되어 있으므로 삭제할 수 있다.' },
+    { what: 'CD의 삭제를 확정한다.', why: 'CD 없이도 모든 정점이 연결된다. 따라서 CD를 다시 넣을 필요가 없으며, 가중치 합은 11로 유지된다.' },
+    { what: 'BE(가중치 4)를 임시로 제거한다. 가중치 합은 7이 된다.', why: '앞서 DE를 삭제했으므로 BE까지 제거하면 E에 연결된 간선이 없어진다. 연결 요소는 A·B·C·D와 E로 나뉜다. 비용은 줄었지만 모든 정점을 연결하지 못하므로 이 상태는 답이 될 수 없다.' },
+    { what: 'BE를 복구한다. 가중치 합은 7에서 11로 돌아온다.', why: 'E를 나머지 정점과 연결하려면 BE가 필요하다. 가중치 합이 늘더라도 연결 조건을 지켜야 하므로 복구한다. 아직 검사하지 않은 간선이 있어 11은 최종 MST 가중치가 아니다.' },
+    { what: 'AC(가중치 3)를 임시로 제거한다. 가중치 합은 8이 된다.', why: 'AC를 빼도 A–B–C 경로가 남는다. BFS 결과에서도 연결 요소가 하나이므로 모든 정점의 연결이 유지된다.' },
+    { what: 'AC의 삭제를 확정한다.', why: 'AC 없이도 모든 정점이 연결되므로 삭제 상태를 유지한다. 남은 간선은 AB·BC·BD·BE이고, 가중치 합은 8이다. 현재 구현은 남은 간선도 계속 검사한다.' },
+    { what: 'AB(가중치 2)를 임시로 제거한다. 가중치 합은 6이 된다.', why: 'AC는 이미 삭제되어 있다. AB까지 제거하면 A가 고립되어 연결 요소가 2개로 나뉜다. 따라서 AB는 삭제할 수 없다.' },
+    { what: 'AB를 복구한다. 가중치 합은 8로 돌아온다.', why: '고립된 A를 다시 연결하기 위해 AB를 유지한다. 모든 정점이 다시 하나의 연결 요소가 된다.' },
+    { what: 'BC(가중치 1)를 임시로 제거한다.', why: 'C에 연결되었던 AC와 CD는 이미 삭제된 상태이다. BC까지 제거하면 C가 고립된다. 가중치 합은 7로 줄지만 연결 조건을 만족하지 못한다.' },
+    { what: 'BC를 복구한다. 가중치 합은 8로 돌아온다.', why: 'C를 다른 정점과 연결하려면 BC가 필요하다. 연결을 유지한 상태에서 마지막 간선인 BD를 검사한다.' },
+    { what: 'BD(가중치 1)를 임시로 제거한다.', why: 'D에 연결되었던 CD와 DE는 이미 삭제되어 있다. BD까지 제거하면 D가 고립되므로 삭제할 수 없다. 이때 가중치 합 7은 비연결 상태의 값이다.' },
+    { what: 'BD를 복구한다. 가중치 합은 8로 돌아온다.', why: 'D를 다시 연결하고 모든 간선의 검사를 마쳤다. 남은 AB·BC·BD·BE는 모든 정점을 사이클 없이 연결하므로 최종 MST가 된다.' },
+  ]
+  return copy[snapshot.index]
+}
+
+export function snapshotStepCopy(run: MstRun, snapshot: Snapshot) {
+  return kruskalStepCopy(run, snapshot) ?? reverseDeleteStepCopy(run, snapshot)
 }

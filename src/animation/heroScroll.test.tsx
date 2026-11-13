@@ -57,5 +57,5 @@ it.each([[false, false], [true, true]])('keeps small/reduced Hero static and nav
   expect(owned()).toHaveLength(0)
   expect(screen.getByRole('link', { name: 'Algorithm Lab 탐색하기' })).toBeDefined()
   expect(screen.getByRole('region', { name: 'MST 도입' }).querySelector('svg')).toBeNull()
-  expect(screen.getByRole('link', { name: '수도코드 / 복잡도' }).getAttribute('href')).toBe('#theory')
+  expect(screen.getByRole('link', { name: '의사코드 / 복잡도' }).getAttribute('href')).toBe('#theory')
 })

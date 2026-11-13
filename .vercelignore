@@ -1,0 +1,7 @@
+*.pdf
+*.mp4
+.git
+.npm-cache
+node_modules
+dist
+coverage

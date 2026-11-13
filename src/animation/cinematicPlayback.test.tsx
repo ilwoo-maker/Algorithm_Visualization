@@ -6,6 +6,7 @@ import { gsap } from 'gsap'
 import App from '../App'
 import { useAlgorithmPlayback } from './useEdgeTransition'
 import { GraphView } from '../components/GraphView'
+import { VERTEX_POSITIONS } from '../components/graphPresentation'
 import { kruskal } from '../algorithms/kruskal'
 import { ASSIGNMENT_GRAPH } from '../algorithms/fixtures'
 
@@ -218,8 +219,10 @@ it('opens a central cut with two endpoint halves while retaining the previous co
   act(() => { motion.pause().time(motion.labels.decision + 0.2) })
   const halves = [...svg.querySelectorAll<SVGLineElement>('.edge-cut')]
   expect(halves).toHaveLength(2)
+  const midX = String((VERTEX_POSITIONS.D.x + VERTEX_POSITIONS.E.x) / 2)
+  const midY = String((VERTEX_POSITIONS.D.y + VERTEX_POSITIONS.E.y) / 2)
   for (const half of halves) {
-    expect(half.getAttribute('x2')).toBe('440'); expect(half.getAttribute('y2')).toBe('170')
+    expect(half.getAttribute('x2')).toBe(midX); expect(half.getAttribute('y2')).toBe(midY)
     expect(Number(half.style.strokeDashoffset)).toBeGreaterThan(0)
     expect(Number(half.style.strokeDashoffset)).toBeLessThan(105)
   }

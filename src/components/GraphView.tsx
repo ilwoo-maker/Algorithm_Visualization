@@ -2,7 +2,7 @@ import { useId } from 'react'
 import type { RefObject } from 'react'
 import type { NormalizedEdge, Snapshot } from '../algorithms/types'
 import type { TransitionPhase } from '../animation/playbackTiming'
-import { EDGE_STYLES, VERTEX_POSITIONS, VERTEX_STYLE, WEIGHT_POSITIONS } from './graphPresentation'
+import { EDGE_STYLES, GRAPH_VIEWBOX, VERTEX_POSITIONS, VERTEX_STYLE, WEIGHT_POSITIONS } from './graphPresentation'
 
 interface GraphViewProps {
   snapshot: Snapshot
@@ -25,12 +25,13 @@ export function GraphView({ snapshot, name, svgRef, phase, target, final = false
   return (
     <>
     <p className="motion-status" role="status">{phases[phase]}{candidate && ['focus', 'decision', 'settle'].includes(phase) ? ` · ${candidate.name} · 아래 정보는 ${snapshot.index}단계 확정 상태` : ''}</p>
-    <svg ref={svgRef} className="graph-svg" viewBox="0 0 520 340" role="img" aria-label={`${name} 그래프`} aria-describedby={descriptionId} aria-busy={phase !== 'idle' && phase !== 'reading'}>
+    <div className="graph-stage">
+      <svg ref={svgRef} className="graph-svg" viewBox={GRAPH_VIEWBOX.attribute} role="img" aria-label={`${name} 그래프`} aria-describedby={descriptionId} aria-busy={phase !== 'idle' && phase !== 'reading'}>
       <desc id={descriptionId}>
         {snapshot.edges.map((edge) => `${edge.name}: 가중치 ${edge.weight}, ${EDGE_STYLES[edge.status].label}`).join('. ')}.
-        연결 요소 {snapshot.components.length}개. {final ? '최종 MST가 확정되어 검사 강조를 종료했습니다.' : '현재 검사 간선은 금색 테두리로 표시됩니다.'} 아래 표에서도 간선별 상태를 확인할 수 있습니다.
+        연결 요소 {snapshot.components.length}개. {final ? '최종 MST가 확정되어 검사 강조를 종료했다.' : '현재 검사 간선은 금색 테두리로 표시된다.'} 아래 표에서도 간선별 상태를 확인할 수 있다.
       </desc>
-      <rect className="stage-flash" aria-hidden="true" x="0" y="0" width="520" height="340" fill="#b9e8ff" opacity="0" />
+      <rect className="stage-flash" aria-hidden="true" x="0" y="0" width={GRAPH_VIEWBOX.width} height={GRAPH_VIEWBOX.height} fill="#b9e8ff" opacity="0" />
       {snapshot.edges.map((edge) => {
         const start = VERTEX_POSITIONS[edge.source]
         const end = VERTEX_POSITIONS[edge.target]
@@ -65,11 +66,12 @@ export function GraphView({ snapshot, name, svgRef, phase, target, final = false
           <text fill={VERTEX_STYLE.label} x={point.x} y={point.y} dominantBaseline="central" textAnchor="middle">{vertex}</text>
         </g>
       }))}
-    </svg>
-    <p ref={noticeRef} className="completion-card" aria-label="MST 완료 안내" role="status" hidden={!final || ['entrance', 'focus', 'decision', 'settle', 'completion'].includes(phase)}>
-      {final ? `MST 구성 완료 · 총 가중치 ${finalWeight}` : ''}
-    </p>
-    <p className="stage-note">빛의 이동은 검사 강조이며 간선의 방향을 뜻하지 않습니다.{disconnected && ' 테두리 색은 분리된 연결 요소를 구분합니다.'}</p>
+      </svg>
+      <p ref={noticeRef} className="completion-card" aria-label="MST 완료 안내" role="status" hidden={!final || ['entrance', 'focus', 'decision', 'settle', 'completion'].includes(phase)}>
+        {final ? `MST 구성 완료 · 총 가중치 ${finalWeight}` : ''}
+      </p>
+    </div>
+    <p className="stage-note">빛의 이동은 검사 강조이며 간선의 방향을 뜻하지 않는다.{disconnected && ' 테두리 색은 분리된 연결 요소를 구분한다.'}</p>
     </>
   )
 }

@@ -8,7 +8,7 @@ it('orders five distinct sections with direct Lab and Theory navigation', () => 
   const regions = ['MST 도입', '알고리즘 개념 비교', 'Algorithm Lab', '두 알고리즘 핵심 비교 및 효율성 평가', '이론과 비교'].map(name => screen.getByRole('region', { name }))
   for (let i = 1; i < regions.length; i++) expect(regions[i - 1].compareDocumentPosition(regions[i]) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   expect(screen.getByRole('link', { name: 'Algorithm Lab 탐색하기' }).getAttribute('href')).toBe('#comparison')
-  expect(screen.getByRole('link', { name: '수도코드 / 복잡도' }).getAttribute('href')).toBe('#theory')
+  expect(screen.getByRole('link', { name: '의사코드 / 복잡도' }).getAttribute('href')).toBe('#theory')
   expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
 })
 it('reuses both existing panels and keeps final results independent of the introduction', () => {

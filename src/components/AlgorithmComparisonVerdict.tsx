@@ -29,8 +29,6 @@ export function AlgorithmComparisonVerdict({ results }: { results: readonly MstR
   const runs = algorithms.map(algorithm => results.find(run => run.algorithm === algorithm))
   const [left, right] = runs
   const sameCost = left && right && left.totalWeight === right.totalWeight
-  const sameTree = sameCost && left.mst.length === right.mst.length
-    && left.mst.every(edge => right.mst.some(candidate => candidate.id === edge.id))
   const sample = left?.snapshots[0] ?? right?.snapshots[0]
   const n = sample?.components.flat().length
   const m = sample?.edges.length
@@ -42,8 +40,8 @@ export function AlgorithmComparisonVerdict({ results }: { results: readonly MstR
       <p className="verdict-kicker"><span aria-hidden="true">🏆</span> ALGORITHM EVALUATION</p>
       <h2 id={`${id}-title`}>두 알고리즘 핵심 비교 및 효율성 평가</h2>
       <p className="verdict-headline">같은 목표, 다른 판단 비용</p>
-      <p>{sameCost ? <>이번 실행에서 두 알고리즘 모두 최소 비용 <strong>{left.totalWeight}</strong>에 도달했습니다. 같은 비용을 얻었지만, 어떤 간선을 검사하고 무엇을 근거로 남겼는지는 달랐습니다.</> : '각 실행에서 얻은 최종 결과와 그 결과를 만드는 데 필요한 판단 비용을 정리했습니다.'}</p>
-      <p className="verdict-scope">Lab의 현재 단계와 별개인 전체 실행의 최종 결과입니다.{sample && ` 공통 입력: 정점 n = ${n}, 이음선 m = ${m}.`}</p>
+      <p>{sameCost ? <>Kruskal은 {inspections(left)}회 검사해 간선 {left.mst.length}개를 선택했고, Reverse-Delete는 {inspections(right)}개 간선을 모두 검사했다. 두 결과의 가중치 합은 <strong>{left.totalWeight}</strong>로 같다.</> : '두 실행의 최종 결과와 판단 비용이다.'}</p>
+      <p className="verdict-scope">Lab의 현재 단계와 별개인 전체 실행의 최종 결과이다.{sample && ` 공통 입력은 정점 n = ${n}, 이음선 m = ${m}이다.`}</p>
     </header>
     <section className="verdict-results" aria-label="샘플 그래프의 최종 실행 결과">
       <div className="verdict-result-cards">{runs.map((run, index) => <div className={`verdict-result-card ${index === 0 ? 'verdict-kruskal' : 'verdict-reverse'}`} key={algorithms[index]}>
@@ -58,7 +56,7 @@ export function AlgorithmComparisonVerdict({ results }: { results: readonly MstR
             {row('최종 결과', run => <><strong>가중치 {run.totalWeight}</strong><span className="verdict-final-edges">{run.mst.map(edge => edge.name).join(', ') || '빈 이음선 집합'}</span></>)}
             {row('이번 입력의 검사 횟수', run => `${inspections(run)}회 검사${run.algorithm === 'kruskal' && early ? ` · ${run.mst.length}개 선택 후 조기 종료` : run.algorithm === 'reverse-delete' ? ' · 전체 이음선 검사' : ''}`)}
             {row('최악 시간복잡도', run => documentedCost('기록을 제외한 핵심 시간', run.algorithm))}
-            {row('작업 공간', run => `${documentedCost('기록 제외 최대 추가 메모리', run.algorithm)} · 시각화 기록 제외`)}
+            {row('작업 공간', run => documentedCost('기록 제외 최대 추가 메모리', run.algorithm))}
             {row('단위연산 / 핵심 비용', run => run.algorithm === 'kruskal' ? '비교문 · 정렬과 집합 대표 원소 비교 (find/equal/merge)' : '비교문 · 정렬과 반복 BFS 방문·연결성 검사')}
           </tbody>
         </table>
@@ -78,19 +76,18 @@ export function AlgorithmComparisonVerdict({ results }: { results: readonly MstR
             {row('전체 기록 공간', run => documentedCost('저장한 전체 실행 기록 메모리', run.algorithm))}
           </tbody></table>
         </div>
-      <p className="verdict-scope">완전 그래프에서는 m = n(n−1)/2 ∈ Θ(n²)입니다. 전체 기록 공간의 Sₖ·Sᵣ는 각각 초기 상태를 포함한 스냅샷 수입니다.{left && right && ` 이번 실행은 Kruskal ${left.snapshots.length}개, Reverse-Delete ${right.snapshots.length}개입니다.`}</p>
+      <p className="verdict-scope">완전 그래프에서는 m = n(n−1)/2 ∈ Θ(n²)이다. 전체 기록 공간의 Sₖ·Sᵣ는 각각 초기 상태를 포함한 스냅샷 수이다.{left && right && ` 이번 실행은 Kruskal ${left.snapshots.length}개, Reverse-Delete ${right.snapshots.length}개이다.`}</p>
       </details>
-      <p className="verdict-tie-note">{sameTree ? '이 입력에서는 최종 이음선 집합도 같습니다. ' : ''}일반적으로 가중치가 같은 이음선이 있으면 최적 MST의 이음선 집합은 달라질 수 있습니다. 최적 가중치의 일치와 이음선 집합의 일치는 구분해야 합니다.</p>
+
     </section>
     <section className="verdict-reasons" aria-labelledby={`${id}-why`}>
       <h3 id={`${id}-why`}>왜 Kruskal이 시간 효율 면에서 유리한가?</h3>
       <div className="verdict-reason-grid">
-        <article><span className="verdict-reason-number">01 / 판단 비용</span><h4>집합 소속 확인과 반복 BFS의 차이</h4><p>비용 차이를 만드는 부분은 정렬 다음의 판단입니다. Kruskal은 서로소인 집합에서 두 정점의 대표를 비교합니다. 이미 연결되어 있으면 기각하고, 다르면 집합을 합칩니다. 현재 구현의 경로 압축과 rank 기반 합치기는 연속 집합 연산의 상각 비용을 α(n)에 비례하게 낮춥니다.</p><p>Reverse-Delete는 임시 제거 뒤에 남은 그래프를 BFS로 확인합니다. 남은 이음선 수가 mₐ이면 한 번에 Θ(n+mₐ)가 필요하고, 이 탐색을 반복해 최악 Θ(m(n+m))이 됩니다. 같은 선택 판단이라도 확인해야 하는 정보의 범위가 다릅니다. 집합 연산을 정확한 상수 시간으로 가정한 비교는 아닙니다.</p></article>
-        <article><span className="verdict-reason-number">02 / 종료 조건</span><h4>필요한 이음선을 확보하면 종료</h4><p>Kruskal은 필요한 n−1개 이음선을 선택하면 검사를 끝낼 수 있습니다.{left && early && ` 이번 입력에서는 ${left.mst.length}개를 선택하기까지 ${inspections(left)}회 검사하고 나머지는 검사하지 않았습니다.`}</p><p>현재 Reverse-Delete 구현은 모든 이음선에 대해 임시 제거와 삭제·복구 판정을 수행합니다. 다른 Reverse-Delete 구현에서도 조기 종료가 불가능하다는 의미는 아닙니다.</p></article>
+        <article><span className="verdict-reason-number">01 / 판단 비용</span><h4>집합 소속 확인과 반복 BFS의 차이</h4><p>Kruskal은 간선 양 끝 정점의 대표만 비교한다. AC를 검사할 때는 A와 C의 대표가 같으므로, 그래프 전체를 다시 탐색하지 않고도 사이클이 생긴다는 것을 판단한다. 경로 압축과 rank 기반 합치기를 적용해 집합 연산의 상각 비용을 낮췄다.</p><p>반면 Reverse-Delete는 임시 제거 뒤에 남은 그래프를 BFS로 다시 탐색한다. 남은 이음선 수가 mₐ이면 한 번 탐색에 Θ(n+mₐ)가 필요하고, 이를 반복해 최악 Θ(m(n+m))이 된다. BE를 뺐을 때 E가 고립되는지도 매번 BFS로 확인해야 한다.</p></article>
+        <article><span className="verdict-reason-number">02 / 종료 조건</span><h4>필요한 이음선을 확보하면 종료</h4><p>Kruskal은 필요한 n−1개 이음선을 선택하면 검사를 끝낼 수 있다.{left && early && ` 이번 입력에서는 ${left.mst.length}개를 선택하기까지 ${inspections(left)}회 검사하고 나머지는 검사하지 않았다.`}</p><p>반면 현재 Reverse-Delete 구현은 모든 이음선의 삭제·복구 여부를 판정한 뒤 종료한다.{right && ` 이번 입력에서는 ${inspections(right) === 7 && m === 7 ? 'DE부터 BC·BD까지 총 7개' : `${inspections(right)}개`} 이음선을 모두 검사했다.`}</p></article>
       </div>
     </section>
-    <p className="verdict-conclusion"><strong>핵심 알고리즘의 최악 시간 분석에서는 Kruskal이 유리합니다.</strong> 근거는 정렬 후의 집합 판별과 반복 BFS의 비용 차이입니다. 이번 입력에서 먼저 검사를 끝낸 점은 종료 조건의 차이를 보여 줍니다. 두 알고리즘의 기록 제외 추가 공간은 모두 Θ(n+m)이므로, 시간과 메모리에 대한 결론은 나눠 정리했습니다.</p>
-    <p className="verdict-scope">검사 횟수·스냅샷 수·애니메이션 재생 시간은 실제 실행 시간 측정값이 아닙니다. 시각화 기록을 만드는 시간과 저장 공간은 핵심 알고리즘 비용에 별도로 더해야 합니다.</p>
+    <p className="verdict-conclusion"><strong>현재 BFS 기반 구현과 비교하면 최악 시간 효율 면에서는 Kruskal이 더 유리하다고 생각한다.</strong> 정렬 후 집합의 대표만 비교하는 방식이 간선마다 BFS를 반복하는 방식보다 입력이 커질 때 증가하는 연산 비용이 작기 때문이다. 이번 그래프에서도 Kruskal은 n−1=4개 간선을 확보한 뒤 CD와 DE를 검사하지 않고 종료했다. 추가 작업 공간은 두 구현 모두 Θ(n+m)으로 같다.</p>
     <a className="verdict-details-link" href="#theory-section" onClick={event => {
       if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return
       const destination = document.getElementById('theory-section')

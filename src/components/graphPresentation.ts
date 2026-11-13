@@ -3,16 +3,18 @@ import type { Action, EdgeStatus } from '../algorithms/types'
 // Keep readable interiors independent of inspection/bloom stroke colors.
 export const VERTEX_STYLE = { fill: '#213e53', label: '#eef8ff', stroke: '#a4bdce' } as const
 
+export const GRAPH_VIEWBOX = { width: 500, height: 284, attribute: '0 0 500 284' } as const
+
 // Presentation only: both panels share this fixed, non-crossing layout.
 export const VERTEX_POSITIONS: Record<string, { x: number; y: number }> = {
-  A: { x: 78, y: 65 }, B: { x: 250, y: 165 }, C: { x: 78, y: 275 },
-  D: { x: 440, y: 275 }, E: { x: 440, y: 65 },
+  A: { x: 78, y: 46 }, B: { x: 250, y: 141 }, C: { x: 78, y: 236 },
+  D: { x: 422, y: 236 }, E: { x: 422, y: 46 },
 }
 
 export const WEIGHT_POSITIONS: Record<string, { x: number; y: number }> = {
-  AB: { x: 164, y: 108 }, AC: { x: 61, y: 170 }, BC: { x: 164, y: 230 },
-  BD: { x: 351, y: 230 }, BE: { x: 351, y: 108 }, CD: { x: 260, y: 292 },
-  DE: { x: 457, y: 170 },
+  AB: { x: 164, y: 94 }, AC: { x: 52, y: 141 }, BC: { x: 164, y: 188 },
+  BD: { x: 336, y: 188 }, BE: { x: 336, y: 94 }, CD: { x: 250, y: 257 },
+  DE: { x: 448, y: 141 },
 }
 
 export const EDGE_STYLES: Record<EdgeStatus, { label: string; color: string; dash?: string; width: number }> = {

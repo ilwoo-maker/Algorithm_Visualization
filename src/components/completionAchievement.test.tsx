@@ -47,7 +47,7 @@ it('shows all seven inspections for Reverse-Delete rather than fourteen snapshot
   jump(scope, 13); expect(scope.queryByLabelText('완료 성취')).toBeNull()
   jump(scope, 14)
   expect(scope.getByLabelText('완료 성취').textContent).toContain('탐색 완료 · 전체 7개 이음선 검사')
-  expect(scope.getByLabelText('완료 결과 요약').textContent).toContain('연결을 끊는 이음선은 복구')
+  expect(scope.getByLabelText('완료 결과 요약').textContent).toContain('제거하면 연결이 끊어져 복구했다')
 })
 it('does not claim early termination when Kruskal inspects every edge', () => {
   reduced()
@@ -85,6 +85,6 @@ it('groups the final result and termination reason without a repeated complexity
   const summary = scope.getByLabelText('완료 결과 요약')
   expect(summary.contains(scope.getByRole('note', { name: '종료 조건 안내' }))).toBe(true)
   expect(summary.contains(scope.getByText('최종 MST 완성'))).toBe(true)
-  expect(summary.textContent).toContain('CD, DE는 검사하지 않습니다')
+  expect(summary.textContent).toContain('CD, DE는 검사하지 않았으며')
   expect(summary.textContent).not.toContain('W(m, n)')
 })

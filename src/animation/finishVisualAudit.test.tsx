@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { snapshotStepCopy } from '../components/stepExplanation'
 import { afterEach, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { gsap } from 'gsap'
@@ -150,7 +151,7 @@ it.each([
     expect(scope.getByLabelText('현재 활성 간선 가중치 합').textContent).toBe(String(weight))
     expect(scope.getByRole('list', { name: '연결 요소' }).textContent!.replace(/[,\s]/g, '').length).toBe(5)
     expect(within(scope.getByRole('list', { name: '연결 요소' })).getAllByRole('listitem').map(el => el.textContent!.replace(/[,\s]/g, '').split('').sort().join('')).sort().join('|')).toBe(components)
-    expect(scope.getByText(snapshot.what)).toBeDefined(); expect(scope.getByText(snapshot.why)).toBeDefined()
+    expect(scope.getByText(snapshotStepCopy(run, snapshot)?.what ?? snapshot.what)).toBeDefined(); expect(scope.getByText(snapshotStepCopy(run, snapshot)?.why ?? snapshot.why)).toBeDefined()
     expect(snapshot.what.length).toBeGreaterThan(0); expect(snapshot.why.length).toBeGreaterThan(0)
     for (const edge of snapshot.edges) {
       expect(edge.status).toBe(expectedStates[edge.name])

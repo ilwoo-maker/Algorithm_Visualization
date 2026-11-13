@@ -1,6 +1,7 @@
 import { useId, useLayoutEffect, useRef, useState } from 'react'
 import type { MstRun, Result } from '../algorithms/types'
 import { AlgorithmPanel } from './AlgorithmPanel'
+import type { AlgorithmPanelHandle } from './AlgorithmPanel'
 
 const COMPACT_QUERY = '(max-width: 1199px)'
 export function AlgorithmLabSection({ runs }: { runs: readonly Result<MstRun>[] }) {
@@ -9,6 +10,7 @@ export function AlgorithmLabSection({ runs }: { runs: readonly Result<MstRun>[] 
   const root = useRef<HTMLElement>(null)
   const tabs = useRef<(HTMLButtonElement | null)[]>([])
   const panels = useRef<(HTMLDivElement | null)[]>([])
+  const panelHandles = useRef<(AlgorithmPanelHandle | null)[]>([])
   const id = useId()
   useLayoutEffect(() => {
     const media = window.matchMedia?.(COMPACT_QUERY)
@@ -31,8 +33,16 @@ export function AlgorithmLabSection({ runs }: { runs: readonly Result<MstRun>[] 
     return () => { media?.removeEventListener('change', update); window.removeEventListener('afterprint', update) }
   }, [])
   const choose = (index: number) => { setSelected(index); tabs.current[index]?.focus() }
+  const runAll = (action: keyof AlgorithmPanelHandle) => { panelHandles.current.forEach(handle => handle?.[action]()) }
   return <section ref={root} aria-label="Algorithm Lab" className="lab-section academic-lab" id="comparison" tabIndex={-1}>
-    <div className="comparison-heading"><h2>알고리즘 나란히 보기</h2><p>각 패널의 단계를 독립적으로 이동할 수 있습니다.</p></div>
+    <div className="comparison-heading">
+      <div className="comparison-title-group"><h2>알고리즘 나란히 보기</h2><p>각 패널의 단계를 독립적으로 이동할 수 있다.</p></div>
+      <div className="lab-sync-controls" role="group" aria-label="동시 재생 제어" hidden={compact}>
+        <button type="button" className="sync-play-button" onClick={() => runAll('play')}>둘 다 재생</button>
+        <button type="button" onClick={() => runAll('pause')}>모두 일시정지</button>
+        <button type="button" onClick={() => runAll('restart')}>모두 초기화</button>
+      </div>
+    </div>
     <div className="lab-tabs" role="tablist" aria-label="실습 알고리즘" hidden={!compact}>
       {runs.map((result, index) => <button key={index} ref={element => { tabs.current[index] = element }} type="button" role="tab" id={`${id}-tab-${index}`} aria-controls={`${id}-panel-${index}`} aria-selected={selected === index} tabIndex={selected === index ? 0 : -1}
         onClick={() => choose(index)} onKeyDown={event => {
@@ -41,7 +51,7 @@ export function AlgorithmLabSection({ runs }: { runs: readonly Result<MstRun>[] 
         }}>{result.ok && result.value.algorithm === 'kruskal' ? 'Kruskal' : 'Reverse-Delete'}</button>)}
     </div>
     <div className="comparison-grid">{runs.map((result, index) => <div key={index} ref={element => { panels.current[index] = element }} className="lab-panel" id={`${id}-panel-${index}`} role={compact ? 'tabpanel' : undefined} aria-labelledby={compact ? `${id}-tab-${index}` : undefined} hidden={compact && selected !== index}>
-      {result.ok ? <AlgorithmPanel run={result.value} visible={!compact || selected === index} /> : <p role="alert">그래프를 준비하지 못했습니다: {result.error.message}</p>}
+      {result.ok ? <AlgorithmPanel ref={handle => { panelHandles.current[index] = handle }} run={result.value} visible={!compact || selected === index} /> : <p role="alert">그래프를 준비하지 못했다: {result.error.message}</p>}
     </div>)}</div>
   </section>
 }
