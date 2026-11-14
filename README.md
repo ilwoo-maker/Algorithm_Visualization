@@ -1,205 +1,195 @@
-# Kruskal과 Reverse-Delete의 최소 신장 트리 비교
+<div align="center">
 
-![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white) ![GSAP](https://img.shields.io/badge/GSAP-0AE448?logo=gsap&logoColor=black) ![Vitest](https://img.shields.io/badge/Vitest-6E9F18?logo=vitest&logoColor=white)
+# Kruskal vs. Reverse-Delete — MST Algorithm Visualization
 
-알고리즘 과제 **주제 A: 알고리즘 동작 시각화**를 위해 만든 웹 프로젝트입니다. 같은 그래프에 Kruskal과 Reverse-Delete를 적용하고, 각 단계의 **동작과 판단 근거**, 최종 결과, 시간·공간 비용을 비교했습니다. 과제 제출과 포트폴리오 공개를 함께 준비하고 있습니다.
+**최소 신장 트리(MST)를 푸는 상향식(간선 추가) · 하향식(간선 삭제) 두 탐욕 알고리즘의 내부 동작과 비용 비교**
 
-> **결과 요약:** 같은 5정점·7간선 입력에서 두 알고리즘 모두 MST 가중치 **8**을 얻었습니다. Kruskal은 **5회 검사 후 종료**, 현재 Reverse-Delete 구현은 **7개 전체 검사**를 수행했습니다. 이 횟수는 실행 속도 측정값이 아닙니다.
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-0F172A?style=for-the-badge&logo=vercel&logoColor=white)](https://algorithm-visualization-snowy.vercel.app)
+[![Tests](https://img.shields.io/badge/Vitest-22%20files%20%C2%B7%20300%20passed-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)](#6-아키텍처-및-검증)
+[![Lint](https://img.shields.io/badge/Oxlint-0%20warnings-0284C7?style=for-the-badge)](#6-아키텍처-및-검증)
 
-## 1. 무엇을 비교했는가?
+![React 19](https://img.shields.io/badge/React_19-20232A?logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Vite 8](https://img.shields.io/badge/Vite_8-646CFF?logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?logo=tailwindcss&logoColor=white)
+![GSAP](https://img.shields.io/badge/GSAP-0AE448?logo=gsap&logoColor=black)
 
-비교한 문제는 **최소 신장 트리(Minimum Spanning Tree, MST)**입니다. 연결된 무방향 가중치 그래프의 모든 정점을 사이클 없이 연결하면서, 선택한 이음선의 가중치 합을 최소화합니다.
+[Live Demo](https://algorithm-visualization-snowy.vercel.app) ·
+[전략 비교](#1-알고리즘-전략-비교) ·
+[실행 분석](#3-주요-분기-및-실행-요약) ·
+[의사코드](#4-핵심-의사코드) ·
+[복잡도 분석](#5-시간공간-복잡도-분석) ·
+[로컬 실행](#7-로컬-실행-및-검증)
 
-| 구분 | Kruskal | Reverse-Delete |
+</div>
+
+---
+
+동일한 무방향 가중치 그래프 위에서 **Kruskal(간선 추가)**과 **Reverse-Delete(간선 삭제)**가 어떤 순서로 간선을 검사하고, 각 단계에서 **무엇을 왜 선택·기각·삭제·복구하는지** 나란히 추적할 수 있는 인터랙티브 웹 시각화 프로젝트입니다.
+
+<p align="center">
+  <img src="docs/assets/strategies-overview.png" alt="두 탐욕 전략 비교 화면 (Kruskal 선택 예 vs. Reverse-Delete 임시 제거 예)" width="96%" />
+</p>
+
+> **핵심 비교 요약 (5정점 · 7간선 공통 입력):** 두 알고리즘 모두 동일한 MST `{AB, BC, BD, BE}` (총 가중치 **8**)를 찾지만, **Kruskal**은 `n - 1 = 4`개 간선을 고른 뒤 **5회 검사(6스냅샷)** 만에 조기 종료하고, BFS 기반 **Reverse-Delete**는 정점 고립 여부를 검증하며 **7개 전체 검사(15스냅샷)** 를 수행합니다. *(검사 횟수와 스냅샷 수는 알고리즘 동작 구조의 차이이며, 실행 시간 벤치마크 수치가 아닙니다.)*
+
+---
+
+## 1. 알고리즘 전략 비교
+
+최소 신장 트리(MST)는 연결된 무방향 가중치 그래프에서 **(a) 모든 정점을 연결**하고 **(b) 사이클이 없으며** 간선 가중치 합이 최소인 트리입니다. 두 알고리즘은 같은 탐욕 3단계(선정 → 적정성 점검 → 해답 점검)를 따르지만 정반대 방향으로 해를 구성합니다.
+
+| 구분 | Kruskal (상향식 · 간선 추가) | Reverse-Delete (하향식 · 간선 삭제) |
 |---|---|---|
-| 시작 상태 | 선택한 이음선이 없는 상태 | 모든 이음선이 있는 상태 |
-| 검사 순서 | 가중치가 작은 순서 | 가중치가 큰 순서 |
-| 판단 기준 | 추가하면 사이클이 생기는가? | 제거해도 모든 정점이 연결되는가? |
-| 판단에 사용한 자료구조 | 서로소인 집합 자료구조 | 인접 리스트와 BFS |
-| 현재 구현의 종료 조건 | $n - 1$개 이음선 선택 | 모든 $m$개 이음선 검사 |
+| **시작 상태** | 선택한 간선이 없는 상태 (`n`개 독립 연결 요소) | 모든 `m`개 간선이 포함된 연결 그래프 (`1`개 연결 요소) |
+| **간선 정렬 순서** | 가중치 오름차순 (동률 시 이름·ID 오름차순) | 가중치 내림차순 (동률 시 이름·ID 오름차순) |
+| **적정성 점검 기준** | 양 끝 정점이 서로 다른 집합인지 확인 (사이클 차단) | 간선 임시 제거 후 연결 요소가 `1`개인지 확인 (고립 차단) |
+| **사용 자료구조** | 서로소 집합 (`UnionFind`: 경로 압축 + 랭크 기반 합치기) | 인접 리스트 + BFS 연결 요소 탐색 |
+| **종료 조건** | `n - 1`개 간선 선택 시 즉시 종료 | 정렬된 `m`개 간선 전체 검사 후 종료 |
 
-### 이 조합을 비교한 이유
+---
 
-같은 MST 문제를 **간선 추가**와 **간선 제거**로 해결하는 과정을 대조했습니다. 선택·기각·삭제·복구의 근거를 따라가며 사이클 판별과 연결성 검사의 차이를 확인하고, 그 차이를 시간·공간 분석과 연결했습니다.
+## 2. 공통 입력 그래프 및 결정성 규칙
 
-수업에서 직접 비교하지 않은 Kruskal–Reverse-Delete 조합을 선택했습니다. Kruskal은 수업 자료 `algo4`를 참고했으며, 추가 검증 자료의 사용 범위는 [참고자료 기록](docs/algorithm-references.md)에 구분했습니다.
+두 전략의 핵심 분기(사이클 기각 vs. 우회로 삭제 vs. 정점 고립 복구)를 한 그래프에서 대조하기 위해 [fixtures.ts](src/algorithms/fixtures.ts)에 정의된 **5정점(`A, B, C, D, E`) · 7간선** 무방향 연결 그래프(초기 가중치 합 `23`)를 사용했습니다.
 
-## 2. 어떤 입력과 조건으로 비교했는가?
+| 간선 | 가중치 | 두 알고리즘에서의 관찰 포인트 |
+|---:|---:|---|
+| `BC`, `BD` | `1`, `1` | 가중치 동률 간선. 이름순(`BC → BD`)으로 Kruskal 초반 선택, Reverse-Delete 마지막 고립 확인 대상 |
+| `AB` | `2` | Kruskal 3번째 선택(`A–B–C–D` 연결) / Reverse-Delete에서는 `AC` 삭제 후 `A` 고립 때문에 복구 |
+| `AC` | `3` | **분기 ①:** Kruskal에서는 `A–B–C–A` 사이클로 **기각**, Reverse-Delete에서는 우회 경로(`A–B–C`)로 **삭제 확정** |
+| `BE` | `4` | **분기 ②:** Reverse-Delete에서 `DE` 삭제 후 빼면 **`E`가 고립**되어 **복구** / Kruskal에서는 4번째로 선택 후 **조기 종료** |
+| `CD`, `DE` | `5`, `7` | Reverse-Delete 초반에 우회 경로로 **삭제 확정** / Kruskal은 이미 `n - 1 = 4`개를 채워 **미검사 종료** |
 
-| 항목 | 내용 |
-|---|---|
-| Problem | 모든 정점을 연결하며 이음선 가중치 합이 최소인 신장 트리 구하기 |
-| Parameter | 정점 수 $n$, 이음선 수 $m$, 각 이음선의 가중치 $w(e)$ |
-| Inputs | 같은 연결 무방향 가중치 그래프: 정점 A·B·C·D·E, $n=5, m=7$ |
-| Outputs | 최종 MST 이음선 집합, 총 가중치, 단계별 실행 기록 |
+- **결정적(Deterministic) 실행:** 동률 간선은 정규화된 이름·ID 오름차순으로 정렬하며, 매 단계 스냅샷(`MstRun.snapshots`)을 `Object.freeze` 불변 객체로 기록해 어느 단계로 이동해도 동일한 그래프·수치·설명을 재현합니다.
 
-| 이음선 | BC | BD | AB | AC | BE | CD | DE |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| 가중치 | 1 | 1 | 2 | 3 | 4 | 5 | 7 |
+---
 
-두 알고리즘에 동일한 입력을 사용했습니다. 같은 가중치는 정규화된 이음선 이름·ID의 오름차순으로 처리하여 실행 순서가 재현되도록 했습니다. 예를 들어 가중치가 모두 1인 BC와 BD는 BC부터 검사합니다. 입력은 [fixtures.ts](src/algorithms/fixtures.ts)에서 확인할 수 있습니다.
+## 3. 주요 분기 및 실행 요약
 
-## 3. 어떻게 실행 과정을 설명했는가?
+<p align="center">
+  <img src="docs/assets/lab-final-comparison.png" alt="Algorithm Lab 최종 MST 완성 비교 화면 (Kruskal 5단계 종료 vs. Reverse-Delete 14단계 종료)" width="96%" />
+</p>
 
-각 알고리즘 패널은 동일한 SVG 그래프와 다음 정보를 제공합니다.
-
-- **무엇을 했나요?** 현재 검사한 이음선과 선택·기각·임시 제거·삭제·복구 동작
-- **왜 그런가요?** 사이클 또는 연결성에 따른 판단과, 이번 그래프의 실제 경로·고립된 정점에 대한 해설
-- **현재 수치:** 활성 이음선 가중치 합, 활성 이음선 수, 연결 요소 수와 구성
-- **상태 확인:** 색상·선 모양·한글 상태명으로 구분한 그래프 범례와 이음선별 상태 표
-
-처음·이전·다음·단계 직접 선택과 자동 재생·일시정지·속도 조절을 제공합니다. 두 패널은 독립적으로 탐색할 수 있습니다. 모바일 탭 전환은 컴포넌트를 해제하지 않고 `hidden` 속성과 CSS로 표시를 바꾸므로 각 패널의 진행 단계가 보존됩니다. 숨겨진 패널의 재생은 일시정지합니다.
-
-### 핵심 장면 A — Kruskal의 AC 기각
-
-AB와 BC를 이미 선택했으므로 A와 C 사이에는 **A–B–C 경로**가 있습니다. AC를 더하면 A–B–C–A 사이클이 생깁니다. 따라서 AC를 기각하고 가중치 합 4를 유지합니다.
-
-이후 BE를 선택하면 E까지 연결됩니다. 필요한 4개 이음선이 모였으므로 종료하며, **CD·DE는 미검사 상태로 남습니다.** 모든 이음선을 검사하지 않은 것은 누락이 아니라 종료 조건에 따른 결과입니다.
-
-### 핵심 장면 B — Reverse-Delete의 BE 임시 제거와 복구
-
-DE와 CD를 삭제한 뒤 BE를 임시 제거하면 **E가 고립**됩니다. 가중치가 낮아졌더라도 모든 정점을 연결하지 못하므로 MST로 확정할 수 없습니다.
-
-| 시점 | 활성 가중치 합 | 연결 요소 | 의미 |
-|---|---:|---:|---|
-| BE 임시 제거, 5단계 | 7 | 2개 | E가 고립된 상태 |
-| BE 복구, 6단계 | 11 | 1개 | 연결 회복, 다음 간선 검사 계속 |
-| 마지막 14단계 | 8 | 1개 | 전체 검사 후 최종 MST 확정 |
-
-**중간 단계의 가중치는 그 시점에 남아 있는 이음선의 합입니다.** 최종 MST 가중치와 구분해 표시합니다. 전체 6개·15개 스냅샷의 상태·수치와 실행 순서는 [전체 실행 기록](docs/mst-core.md#과제-그래프의-실행-기록)에 정리했습니다.
-
-## 4. 핵심 의사코드
-
-아래는 두 알고리즘의 판단과 종료 조건을 비교하기 위한 요약입니다. 입력 검증·집합 연산·BFS·실행 기록을 포함한 상세 의사코드는 [분석 문서](docs/mst-lecture.md#의사코드)에 있습니다.
-
-```text
-Kruskal(G):
-  T ← 빈 집합
-  각 정점을 서로 다른 집합으로 초기화
-  이음선을 가중치 오름차순으로 정렬
-  각 이음선 (u, v)에 대해:
-    |T| = n−1이면 종료
-    p ← find(u), q ← find(v)
-    equal(p, q)가 거짓이면:
-      merge(p, q)
-      이음선을 T에 추가
-    그렇지 않으면 사이클을 만들므로 기각
-  T 반환
-
-Reverse-Delete(G):
-  T ← 모든 이음선 집합
-  이음선을 가중치 내림차순으로 정렬
-  각 이음선 e에 대해:
-    T에서 e를 임시 제거
-    BFS로 현재 그래프의 연결 요소 계산
-    연결 요소가 하나이면 삭제 확정
-    그렇지 않으면 e를 복구
-  T 반환
-```
-
-## 5. 비교 결과와 해석
+1. **Kruskal 4단계 — `AC(3)` 사이클 기각:** `BC(1) → BD(1) → AB(2)` 선택으로 이미 `A–B–C`가 연결되어 있으므로, `BE(4)`보다 가벼운 `AC`라도 추가하면 사이클이 생겨 기각하고 합 `4`를 유지합니다.
+2. **Kruskal 5단계 — `BE(4)` 선택 및 조기 종료:** `E`까지 연결해 `n - 1 = 4`개 간선(합 `8`)을 채우자마자 `CD(5)`와 `DE(7)`은 검사하지 않고 종료합니다.
+3. **Reverse-Delete 5~6단계 — `BE(4)` 임시 제거와 복구:** `DE(7)`, `CD(5)`를 지운 상태에서 `BE`를 빼면 활성 합이 `7`로 줄어 보이지만 연결 요소가 `{A, B, C, D}`와 `{E}`로 쪼개집니다. `BFS`로 고립을 감지해 6단계에서 `BE`를 복구(합 `11`)한 뒤 남은 간선 검사를 이어 갑니다.
 
 | 비교 항목 | Kruskal | Reverse-Delete |
 |---|---|---|
-| 최종 MST | AB, BC, BD, BE | AB, BC, BD, BE |
-| 최종 가중치 | **8** | **8** |
-| 검사한 이음선 수 | **5개** | **7개** |
-| 처리 결과 | 4개 선택, AC 기각, CD·DE 미검사 | DE·CD·AC 삭제, BE·AB·BC·BD 복구·유지 |
-| 초기 상태 포함 스냅샷 수 | 6개, 단계 번호 0~5 | 15개, 단계 번호 0~14 |
+| **최종 MST / 가중치 합** | `AB, BC, BD, BE` / **8** | `AB, BC, BD, BE` / **8** |
+| **검사한 간선 수** | **5회** (`CD, DE` 미검사) | **7회** (`m`개 전체 검사) |
+| **처리 결과 요약** | 4개 선택, 1개(`AC`) 기각, 2개 미검사 | 3개(`DE, CD, AC`) 삭제, 4개(`BE, AB, BC, BD`) 복구·유지 |
+| **기록된 스냅샷 수** | **6개** (`0~5단계`) | **15개** (`0~14단계`, 임시 제거·판정 분리 기록) |
 
-이 입력에서는 **최종 MST와 가중치가 같았지만 검사 과정은 달랐습니다.** Kruskal은 필요한 이음선을 선택하면 종료하며, 현재 Reverse-Delete 구현은 모든 이음선의 삭제 가능 여부를 확인합니다.
+> 전체 6단계 · 15단계 스냅샷별 활성 간선과 가중치 변화표는 [전체 실행 기록](docs/mst-core.md#과제-그래프의-실행-기록)에서 확인할 수 있습니다.
 
-검사 횟수와 스냅샷 수는 서로 다른 값입니다. Reverse-Delete는 이음선 하나마다 임시 제거와 확정 판정을 따로 기록합니다. **화면에서 먼저 끝나는 것과 실제 계산 속도가 빠른 것은 구분해야 하며, 이 프로젝트는 실행 시간 벤치마크를 수행한 결과가 아닙니다.**
+---
 
-또한 일반적인 동률 그래프에서는 서로 다른 MST가 나올 수 있습니다. 이번 입력에서 이음선 집합까지 같다는 결과를 모든 그래프로 일반화하지 않습니다.
+## 4. 핵심 의사코드
 
-### 시간·공간복잡도
+웹앱 내 이론 비교 탭과 동일한 알고리즘 구조를 간결하게 정리한 핵심 로직입니다. (세부 입력 검증, 스냅샷 불변 계약, 서로소 집합 `initialize/find/equal/merge` 전개는 [의사코드 상세 문서](docs/mst-lecture.md#의사코드)에 정리되어 있습니다.)
 
-정점 수는 $n$, 이음선 수는 $m$이며 단위연산은 비교문입니다. $\lg$는 밑이 2인 로그입니다. 아래 시간은 **시각화 기록을 제외한 핵심 알고리즘의 최악 분석**입니다.
+```cpp
+void kruskal(int n, int m, set_of_edges E, set_of_edges& F) {
+  index i, j;
+  set_pointer p, q;
+  edge e;
+  Sort the m edges in E by weight in nondecreasing order; // tie-break: name asc
+  F = ∅;
+  initial(n);
+  while (number of edges in F is less than n - 1) {
+    e = next lightest edge in E;
+    i, j = indices of vertices connected by e;
+    p = find(i);
+    q = find(j);
+    if (!equal(p, q)) {
+      merge(p, q);
+      add e to F;
+    }
+  }
+}
 
-| 비교 항목 | Kruskal | 현재 BFS 기반 Reverse-Delete |
+void reverse_delete(int n, int m, set_of_edges E, set_of_edges& F) {
+  edge e;
+  Sort the m edges in E by weight in nonincreasing order; // tie-break: name asc
+  F = E;
+  for each edge e in sorted E {
+    remove e from F;
+    if (!is_connected(n, F)) // BFS로 연결 요소 수가 1인지 확인
+      add e to F;
+  }
+}
+```
+
+---
+
+## 5. 시간·공간 복잡도 분석
+
+정점 수 `n`, 간선 수 `m`, 로그 밑 `2`(`lg`) 기준, **시각화 스냅샷 기록을 제외한 핵심 알고리즘의 최악 시간·공간 복잡도**입니다.
+
+| 비교 항목 | Kruskal (`UnionFind`) | Reverse-Delete (현재 BFS 기반) |
 |---|---|---|
-| 핵심 최악 시간 $W(m,n)$ | $\Theta(m \lg m)$ | $\Theta(m(n+m)) = \Theta(mn+m^2)$ |
-| 주요 비용 | 정렬과 집합 대표 비교·합치기 | 정렬과 반복 BFS 연결성 검사 |
-| 완전 그래프에서 $m \in \Theta(n^2)$ | $\Theta(n^2 \lg n)$ | $\Theta(n^4)$ |
-| 기록 제외 구현 추가 공간 | $\Theta(n+m)$ | $\Theta(n+m)$ |
-| 전체 실행 기록 공간 | $\Theta(S_{\mathrm K}(n+m))$ | $\Theta(S_{\mathrm R}(n+m))$ |
+| **핵심 최악 시간 `W(m, n)`** | `Θ(m lg m)` | `Θ(m(n + m)) = Θ(mn + m²)` |
+| **시간을 지배하는 연산** | 간선 정렬 `Θ(m lg m)` (집합 연산 흡수) | `m`회 반복되는 인접 리스트 구성 + `BFS` (`Θ(n + mₐ)`) |
+| **희소 그래프 (`m ≈ n`)** | `Θ(n lg n)` | `Θ(n²)` |
+| **완전 그래프 (`m ∈ Θ(n²)`)** | `Θ(n² lg n)` | `Θ(n⁴)` |
+| **핵심 추가 작업 공간** | `Θ(n + m)` *(집합 자료구조 자체는 `Θ(n)`)* | `Θ(n + m)` *(인접 리스트 · 방문 배열 포함)* |
+| **전체 스냅샷 저장 공간** | `Θ(Sₖ(n + m))` | `Θ(Sᵣ(n + m))` |
 
-**현재 구현의 핵심 최악 시간 분석에서는 Kruskal이 유리합니다.** 정렬 후 집합 소속을 확인하는 비용과, 이음선을 제거할 때마다 그래프를 탐색하는 비용이 다르기 때문입니다.
+- **Kruskal의 집합 연산 비용:** [unionFind.ts](src/algorithms/unionFind.ts)는 경로 압축과 랭크 기반 합치기를 함께 사용해, 연속 연산의 상각 비용이 역 아커만 함수 `α(n)`에 비례하므로 전체 실행 시간이 정렬 비용 `Θ(m lg m)`에 흡수됩니다.
+- **Reverse-Delete의 탐색 비용과 범위:** 현재 구현은 매 단계 남은 간선 `mₐ`개로 인접 리스트를 구성하고 BFS를 수행하므로 한 단계 `Θ(n + mₐ)`, 최악 총량 `Θ(m(n + m))`이 됩니다. 이는 현재 BFS 구현에 대한 분석이며, 고급 동적 연결성 자료구조를 쓰는 변형 구현까지 같은 비용이라고 일반화하지 않습니다.
+- **기록 공간 분리:** `Sₖ`, `Sᵣ`는 각 알고리즘의 스냅샷 수입니다. 시각화 UI 재생을 위해 매 단계 상태를 불변 복사해 남기는 비용은 핵심 알고리즘의 공간 복잡도와 분리해 해석합니다. 상세 유도는 [복잡도 분석 문서](docs/mst-lecture.md#표기와-분석-범위)에 있습니다.
 
-- Kruskal의 집합 자료구조는 경로 압축과 rank 기반 합치기를 사용합니다. 연속 집합 연산의 상각 비용은 $\alpha(n)$에 비례하는 상한으로 분석하며, 한 번의 연산이 항상 정확한 상수 시간인 것은 아닙니다.
-- Reverse-Delete의 BFS 한 번은 현재 남은 이음선 수 $m_a$를 기준으로 $\Theta(n+m_a)$입니다. 반복 탐색의 최악 총량을 $\Theta(m(n+m))$으로 분석했습니다. 고급 연결성 자료구조를 사용하는 다른 구현까지 같은 비용이라고 일반화하지 않습니다.
-- 집합 자료구조 자체 공간 $\Theta(n)$과, 정렬 배열·상태 저장 등을 포함한 구현 추가 공간 $\Theta(n+m)$은 구분합니다.
-- $S_{\mathrm K}$·$S_{\mathrm R}$는 각 알고리즘의 스냅샷 수입니다. 기록 생성·저장은 추가 비용이며, 전체 프로그램의 비용을 핵심 알고리즘의 시간과 동일하게 해석하지 않습니다.
+---
 
-유도 과정과 분석 모형·실제 최적화의 차이는 [복잡도 분석](docs/mst-lecture.md#표기와-분석-범위)에 정리했습니다.
+## 6. 아키텍처 및 검증
 
-## 6. 화면 확인 순서
+알고리즘 코어는 React · SVG · GSAP과 완전히 분리된 순수 TypeScript 모듈로 동작하며, UI 컴포넌트는 계산된 불변 `Snapshot`을 읽기만 합니다.
 
-1. **개념 소개:** 같은 입력에서 추가와 제거의 판단 기준 비교
-2. **Algorithm Lab:** Kruskal 4단계의 AC 기각, Reverse-Delete 5·6단계의 BE 임시 제거·복구 확인
-3. **독립 비교 섹션:** 탭을 열지 않고 최종 결과·검사 횟수·시간·공간 비용 확인
-4. **상세 이론:** 문제 정의·입출력, 의사코드, 복잡도 유도 확인
-5. **참고자료 및 근거:** 기존 참고자료·추가 검증 자료·자체 분석 범위 확인
-
-| 제출·공개 자료 | 현재 상태 |
+| 디렉터리 / 문서 | 역할 |
 |---|---|
-| 공개 웹사이트 | [Algorithm Visualization](https://algorithm-visualization-snowy.vercel.app) |
-| 시연 영상 | 제작 예정, 1~3분 |
-| 제출 PDF | 제작 예정, 핵심 캡처와 웹사이트·영상 링크 포함 |
+| [src/algorithms](src/algorithms) | 그래프 검증·정규화, `UnionFind`, `Kruskal`, `Reverse-Delete`, BFS 연결 요소, 불변 스냅샷 생성 |
+| [src/animation](src/animation) | 패널별 독립 재생 타임라인, `0.5x / 1x / 2x` 배속, Reduced Motion 대응 및 GSAP 연출 |
+| [src/components](src/components) | 개념 비교 섹션, 인터랙티브 Algorithm Lab, 요약 비교표, 이론 비교 탭, 참고자료 섹션 |
+| [docs/mst-core.md](docs/mst-core.md) | 알고리즘 모듈 API 계약, 오류 코드, 결정성 규칙 및 과제 그래프 전체 스냅샷 기록 |
+| [docs/mst-lecture.md](docs/mst-lecture.md) | 문제 정의·입출력 계약, 순수 의사코드, 점근 표기 및 복잡도 유도 노트 |
+| [docs/algorithm-references.md](docs/algorithm-references.md) | 출처별 확인 범위와 자체 분석 근거 구분 기록 |
 
-웹사이트는 검증된 `dev` 브랜치 최신 상태를 Vercel CLI로 직접 배포했습니다. 현재 Git Push에 따른 자동 배포는 연결하지 않았습니다. 영상 제작 후 해당 링크도 추가합니다.
+### 자동 검증 결과 (`2026-11-14` 기준)
 
-배포 설정은 Vite, Node.js 24.x, 설치 `npm ci`, 빌드 `npm run build`, 출력 `dist`입니다. 공개 주소의 HTML·JS·CSS·favicon 응답을 확인했으며, 실제 화면 조작과 최종 모바일·접근성 검수는 별도입니다.
+| 항목 | 명령어 | 확인 결과 |
+|---|---|---|
+| **단위 · 통합 · UI 테스트** | `npm test` (`vitest run`) | **22개 테스트 파일, 300개 테스트 PASS** |
+| **타입 체크 · 프로덕션 빌드** | `npm run build` (`tsc -b && vite build`) | **오류 0건** (`dist` 번들 정상 생성) |
+| **정적 린트 검사** | `npm run lint` (`oxlint`) | **54개 파일, 0 warnings · 0 errors** |
+| **CI 워크플로** | [.github/workflows/ci.yml](.github/workflows/ci.yml) | Node.js 24에서 `npm ci → test → build → lint` 정의 |
 
-## 7. 구현과 검증
+---
 
-알고리즘은 React와 분리된 TypeScript 코어에서 실행되며, 결과를 불변 `MstRun.snapshots`로 남깁니다. SVG·설명·표·수치는 선택한 스냅샷을 읽습니다. GSAP과 배경 Canvas는 시각적 연출을 담당하며 알고리즘의 판정을 변경하지 않습니다. 과제 입력 전용 보충 설명도 계산 결과를 수정하지 않습니다.
+## 7. 로컬 실행 및 검증
 
-| 구성 | 위치 |
-|---|---|
-| 알고리즘·집합 연산·연결 요소·스냅샷 | [src/algorithms](src/algorithms) |
-| 단계 탐색·재생·전환 효과 | [src/animation](src/animation) |
-| 그래프·설명·비교·이론 UI | [src/components](src/components) |
-| 구현 계약과 전체 실행 기록 | [docs/mst-core.md](docs/mst-core.md) |
-| 의사코드와 분석 설명 | [docs/mst-lecture.md](docs/mst-lecture.md) |
-| 출처와 근거 적용 범위 | [docs/algorithm-references.md](docs/algorithm-references.md) |
+[package.json](package.json) 기준 지원 Node.js 범위는 `^22.22.2 || ^24.15.0 || >=26.0.0`입니다.
 
-화면은 React·SVG·Canvas·GSAP으로 구성했고, Vitest·Testing Library로 로직과 UI를 검증합니다.
-
-**2026-11-13 로컬 코드 검증:** 테스트 22개 파일 **300개 PASS**, 프로덕션 빌드·린트·공백 검사 PASS. 자동 검사에서는 전체 단계의 상태·가중치·연결 요소·설명 일치, 재생 제어·취소, 두 패널의 독립성·동시 재생, 완료 상태, 이론 탐색과 인쇄 상태 복구 등을 확인했습니다.
-
-GitHub Actions는 `dev` Push와 `main` 대상 Pull Request에서 Node.js 24로 `npm ci → npm test → npm run build → npm run lint`를 실행하도록 구성되어 있습니다. **이 로컬 변경의 원격 CI 결과는 아직 확인하지 않았습니다.**
-
-`@media print`와 인쇄 전후 처리로 비교 섹션·이론 전체 탭·상세 비교·참고자료를 출력하고, 펼침 상태는 인쇄 후 복구합니다. Hero와 Lab은 인쇄에서 숨기므로 **제출 PDF의 단계별 그래프는 별도 캡처로 넣어야 합니다.**
-
-자동 검사 통과가 실제 화면 품질을 보증하지는 않습니다. 최종 모바일 배치·200% 확대·키보드·콘솔 오류·모션 감소 설정·물리적 인쇄/PDF 페이지 나눔은 제출 전에 수동 확인이 필요합니다.
-
-## 8. 로컬 실행
-
-Node.js 24의 지원 버전을 사용합니다. 정확한 허용 범위는 [package.json](package.json)의 `engines`에 있습니다. 저장소 폴더에서 다음을 실행합니다.
-
-```sh
+```bash
 npm ci
 npm run dev
 ```
 
-터미널에 표시되는 주소를 브라우저에서 엽니다. Windows PowerShell에서 npm 실행 정책에 걸리면 같은 명령을 `npm.cmd`로 실행할 수 있습니다.
+전체 테스트, 빌드, 린트를 한 번에 검증하려면 아래 명령을 실행합니다. *(Windows PowerShell 실행 정책 제한 시 `npm` 대신 `npm.cmd`를 사용하세요.)*
 
-```sh
+```bash
 npm test
 npm run build
 npm run lint
-git diff --check
 ```
 
-## 9. 참고자료와 AI 활용
+---
 
-- **기존 구현 참고:** 수업 제공 `algo4.pdf`, Kruskal과 집합 연산·종료 조건·최악 시간 분석 관련 30·34~36쪽.
-- **추가 검증:** KOCW의 그래프 순회·최소비용 신장트리 자료와 Princeton의 MST·서로소 집합·BFS 자료.
-- **관련 연구:** 국내 Kruskal·역-삭제 효율적 구현 논문은 초록·서지만 확인했으며, 원문을 읽은 자료나 우리 실행 결과의 근거로 사용하지 않았습니다.
-- **프로젝트 자체 분석:** 입력의 최종 가중치·간선 집합·검사 횟수, 현재 반복 BFS와 스냅샷 기록 비용.
+## 8. 참고문헌
 
-자료별 링크와 적용 범위, 원문 접근 제한은 [참고자료 기록](docs/algorithm-references.md)에 정리했습니다.
-
-AI 도구 Codex를 코드 작성 보조, 설명 초안 정리, 테스트 작성·실행 및 자료 조사에 활용했습니다. AI 보조 사실과 외부 참고문헌은 구분하며, 제출 전 작성자가 설명·수식·출처와 실제 동작을 최종 확인해야 합니다.
+- 수업 강의자료 `algo4.pdf` / `algo4-강의용-part-1.pdf` — *Chap. 4 The Greedy Approach* (탐욕 기법 3단계, 트리 조건, Kruskal `find/equal/merge`·경로 압축/랭크·최악 시간 분석)
+- Robert Sedgewick & Kevin Wayne, *Algorithms*, 4th ed. — [§4.3 Minimum Spanning Trees](https://algs4.cs.princeton.edu/43mst/index.php), [§1.5 Union-Find](https://algs4.cs.princeton.edu/15uf/)
+- Princeton University, *COS 423: Greedy Algorithms II*, Spring 2013, [Slide 34](https://www.cs.princeton.edu/courses/archive/spring13/cos423/lectures/04GreedyAlgorithmsII.pdf) (Reverse-Delete 원리 및 정당성)
+- KOCW 공개 강의자료 — [「그래프 순회 및 최소비용 신장트리」](https://contents.kocw.net/document/8th_Traversal_MCSP.pdf)
+- 세부 출처별 인용 범위와 자체 검증 구분은 [docs/algorithm-references.md](docs/algorithm-references.md)에서 확인할 수 있습니다.
