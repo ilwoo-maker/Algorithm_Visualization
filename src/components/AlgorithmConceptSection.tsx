@@ -4,7 +4,7 @@ import './academicLab.css'
 import { stepExplanation } from './stepExplanation'
 export function AlgorithmConceptSection({ runs }: { runs: readonly MstRun[] }) {
   return <section className="concept-section academic-concept" aria-label="알고리즘 개념 비교">
-    <p className="eyebrow">TWO GREEDY STRATEGIES</p><h2>간선을 추가하는 방법과 제거하는 방법</h2><p>Kruskal은 간선이 없는 상태에서 시작하고, Reverse-Delete는 모든 간선이 있는 상태에서 시작한다. 차이는 간선을 처리하는 순서뿐이 아니다. Kruskal은 추가했을 때 사이클이 생기는지 판단하고, Reverse-Delete는 제거한 뒤에도 연결이 유지되는지 판단한다.</p>
+    <p className="eyebrow">TWO GREEDY STRATEGIES</p><h2>간선을 추가하는 방법과 제거하는 방법</h2><p>Kruskal은 간선이 없는 상태에서 시작하고, Reverse-Delete는 모든 간선이 있는 상태에서 시작한다. Kruskal은 추가했을 때 사이클이 생기는지 판단하고, Reverse-Delete는 제거한 뒤에도 연결이 유지되는지 판단한다.</p>
     <div className="concept-grid">{(['kruskal', 'reverse-delete'] as const).map(algorithm => {
       const run = runs.find(candidate => candidate.algorithm === algorithm)
       const isKruskal = algorithm === 'kruskal', name = isKruskal ? 'Kruskal' : 'Reverse-Delete'

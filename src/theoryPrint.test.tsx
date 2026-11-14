@@ -10,9 +10,9 @@ it('shows authoritative Definition, actual procedures and operation-based comple
     for (const term of ['Problem', 'Parameter', 'Inputs', 'Outputs']) expect(specification.textContent).toContain(term)
   }
   fireEvent.click(theory.getByRole('tab', { name: '알고리즘 의사코드' }))
-  expect(theory.getByLabelText('Procedure part — Kruskal 의사코드').textContent).toContain('KRUSKAL(input):')
-  expect(theory.getByLabelText('Procedure part — Reverse-Delete 의사코드').textContent).toContain('REVERSE_DELETE(input):')
-  expect(theory.getByLabelText('Procedure part — 공통 검증과 BFS 의사코드').textContent).toContain('BFS_COMPONENTS(vertices, activeEdges):')
+  expect(theory.getByLabelText('Procedure part — Kruskal 의사코드').textContent).toContain('KRUSKAL(G = (V, E, w)):')
+  expect(theory.getByLabelText('Procedure part — Reverse-Delete 의사코드').textContent).toContain('REVERSE_DELETE(G = (V, E, w)):')
+  expect(theory.getByLabelText('Procedure part — BFS 연결 요소 탐색 의사코드').textContent).toContain('BFS_COMPONENTS(V, F):')
   fireEvent.click(theory.getByRole('tab', { name: '복잡도 분석' }))
   expect(theory.getByRole('tabpanel').textContent).toContain('Θ(Sₖ(n+m))')
   expect(theory.getByRole('heading', { name: '기본 연산' })).toBeDefined()

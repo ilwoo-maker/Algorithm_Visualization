@@ -22,53 +22,33 @@
 
 두 알고리즘 모두 입력을 변경하지 않는다. 과제 그래프에서는 같은 MST를 반환하지만, 일반적인 동률 그래프에서는 이음선 집합이 달라도 최적 가중치는 같다. 각 `Snapshot.totalWeight`는 그 시점의 활성 이음선 합이며, 최종 결과의 `MstRun.totalWeight`와 구분한다. 특히 Reverse-Delete의 임시 제거 기록은 비연결 상태일 수 있다.
 
-### Definition part — 공통 자료구조와 보조 연산
+### Definition part — 공통 그래프와 자료구조
 
 ```text
-Graph = (vertices: 문자열 배열, edges: (source, target, weight) 배열)
-n = 정점 수, m = 이음선 수
-PreparedGraph = 검증·정렬·끝점 정규화된 그래프의 불변 복사본
-Result<T> = Success(T) | Failure(code, 한국어 message)
+Graph G = (V, E, w)
+V: 정점 집합 (정점 수 n)
+E: 무방향 가중치 이음선 집합 (이음선 수 m)
+w(e): 이음선 e의 가중치
 
 DisjointSets (서로소인 집합 자료구조):
-  parent: Map<Vertex, Vertex>, rank: Map<Vertex, Integer>
-
-WorkingState:
-  states: Map<EdgeId, EdgeStatus>
-  snapshots: Snapshot 배열
-
-Snapshot:
-  현재 행동·이유·이음선, 전체 이음선별 상태, 활성 이음선 ID와 가중치 합,
-  활성 그래프의 BFS 연결 요소, 한국어 what/why
-
-CAPTURE(graph, states, metadata):
-  상태를 복사하고 활성 이음선을 추출하여 BFS 연결 요소를 구한다.
-  가중치 합을 계산하고 중첩 자료까지 동결한 스냅샷을 반환한다.
-FINISH(graph, snapshots):
-  마지막 활성 이음선으로 MST를 만들고 최종 결과·기록 배열을 동결한다.
+  parent: 각 정점의 부모 정점
+  rank: 트리 높이 상한
 ```
 
-### Procedure part — 공통 검증과 BFS
+### Procedure part — BFS 연결 요소 탐색
 
 ```text
-PREPARE(input):
-  그래프/정점/이음선 형식과 중복, 루프, 끝점, 가중치를 검사한다.
-  오류이면 Failure(code, 한국어 message)를 반환한다.
-  정점과 이음선을 복사하고 끝점/ID/이름을 정규화하여 정렬한다.
-  BFS_COMPONENTS(vertices, edges)의 요소 수가 1이 아니면 비연결 오류를 반환한다.
-  불변 PreparedGraph를 반환한다.
-
-BFS_COMPONENTS(vertices, activeEdges):
-  각 정점의 인접 배열을 만들고 각 무방향 이음선을 양쪽에 추가한다.
-  visited ← 빈 Set, components ← []
-  FOR start IN vertices:
+BFS_COMPONENTS(V, F):
+  F의 간선들로 각 정점의 인접 리스트 adj 구성
+  visited ← ∅,  components ← []
+  FOR start IN V:
     IF start IN visited: CONTINUE
-    queue ← [start], visited에 start 추가, head ← 0
+    queue ← [start],  visited에 start 추가,  head ← 0
     WHILE head < queue.length:
-      vertex ← queue[head], head ← head + 1
-      FOR neighbor IN adjacency[vertex]:
-        IF neighbor NOT IN visited:
-          visited에 neighbor 추가, queue에 neighbor 추가
+      u ← queue[head],  head ← head + 1
+      FOR v IN adj[u]:
+        IF v NOT IN visited:
+          visited에 v 추가,  queue에 v 추가
     components에 queue 추가
   RETURN components
 ```
@@ -106,45 +86,41 @@ merge(p, q):
 이 의사코드에서는 두 대표 원소 p와 q의 비교가 선택과 기각을 가른다. 대표가 다르면 서로 떨어진 집합을 합칠 수 있고, 같으면 이미 연결된 정점 사이에 간선을 더하는 것이므로 사이클이 생긴다. 이번 입력의 AC 기각이 두 번째 경우에 해당한다. 선택한 간선이 n−1개가 되면 반복을 끝내므로, 정렬된 간선을 반드시 모두 검사하는 것은 아니다.
 
 ```text
-KRUSKAL(input):
-  graph ← PREPARE(input); 오류이면 즉시 반환
-  서로소인 집합 초기화, 모든 이음선 상태 ← pending, selectedCount ← 0
-  snapshots ← [CAPTURE(초기 상태, 초기 한국어 설명)]
-  ordered ← 이음선을 (가중치 ↑, 이름 ↑)으로 정렬한 복사본
-  FOR edge IN ordered:
-    IF selectedCount = n - 1: BREAK
-    p ← find(edge.source), q ← find(edge.target)
-    IF NOT equal(p, q):
+KRUSKAL(G = (V, E, w)):
+  F ← ∅                                       // MST에 선택된 간선 집합
+  initialize(V)                               // 각 정점을 독립된 서로소 집합으로 초기화
+  ordered ← E를 (가중치 ↑, 이름 ↑)으로 정렬
+
+  FOR (u, v) IN ordered:
+    IF |F| = n - 1: BREAK                     // n−1개 이음선을 선택하면 조기 종료
+    p ← find(u),  q ← find(v)
+    IF NOT equal(p, q):                       // 서로 다른 집합이면 사이클이 생기지 않음
       merge(p, q)
-      states[edge] ← selected, selectedCount ← selectedCount + 1
-      snapshots에 CAPTURE(선택, 서로 다른 연결 요소라는 이유) 추가
+      F ← F ∪ {(u, v)}
     ELSE:
-      states[edge] ← rejected
-      snapshots에 CAPTURE(기각, 같은 연결 요소의 사이클이라는 이유) 추가
-  RETURN Success(FINISH(graph, snapshots))
+      // 이미 연결된 정점이므로 추가 시 사이클 형성 → 기각
+
+  RETURN F
 ```
 
 ### Procedure part — Reverse-Delete
 
-여기서는 먼저 간선을 임시 제거하고, 그 상태에서 구한 연결 요소 수로 삭제 또는 복구를 결정한다. 연결 요소가 하나이면 제거 상태를 유지하고, 둘 이상이면 다시 연결해야 하므로 복구한다. 이번 입력에서는 BE를 뺐을 때 E가 고립되는 장면이 이 분기를 보여 준다. 임시 제거와 확정 판정을 별도 기록으로 나눠, 판단 전후를 구분했다.
+여기서는 먼저 간선을 임시 제거하고, 그 상태에서 구한 연결 요소 수로 삭제 또는 복구를 결정한다. 연결 요소가 하나이면 제거 상태를 유지하고, 둘 이상이면 다시 연결해야 하므로 복구한다. 이번 입력에서는 BE를 뺐을 때 E가 고립되는 장면이 이 분기를 보여 준다.
 
 ```text
-REVERSE_DELETE(input):
-  graph ← PREPARE(input); 오류이면 즉시 반환
-  모든 이음선 상태 ← present
-  snapshots ← [CAPTURE(초기 상태, 초기 한국어 설명)]
-  ordered ← 이음선을 (가중치 ↓, 이름 ↑)으로 정렬한 복사본
-  FOR edge IN ordered:
-    states[edge] ← temporarily-removed
-    attempt ← CAPTURE(임시 제거, BFS 검사 설명)
-    snapshots에 attempt 추가
-    IF attempt.components.length = 1:
-      states[edge] ← removed
-      snapshots에 CAPTURE(삭제 확정, 연결 유지라는 이유) 추가
+REVERSE_DELETE(G = (V, E, w)):
+  F ← E                                       // 모든 간선이 포함된 상태에서 시작
+  ordered ← E를 (가중치 ↓, 이름 ↑)으로 정렬
+
+  FOR (u, v) IN ordered:
+    F ← F \ {(u, v)}                          // 간선을 임시로 제거
+    components ← BFS_COMPONENTS(V, F)         // 남은 간선으로 연결 요소 탐색
+    IF |components| = 1:
+      // 제거해도 모든 정점이 연결됨 → 삭제 확정
     ELSE:
-      states[edge] ← kept
-      snapshots에 CAPTURE(복구, 임시 상태의 분리된 요소를 명시한 이유) 추가
-  RETURN Success(FINISH(graph, snapshots))
+      F ← F ∪ {(u, v)}                        // 정점이 고립(|components| > 1)되므로 복구
+
+  RETURN F
 ```
 
 ## 표기와 분석 범위

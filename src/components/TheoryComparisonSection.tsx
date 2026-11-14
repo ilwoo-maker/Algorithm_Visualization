@@ -38,7 +38,7 @@ function PseudocodePanel() {
   const main = procedures.filter(group => ['Procedure part — Kruskal', 'Procedure part — Reverse-Delete'].includes(group.title))
   return <><p className="theory-panel-description">정렬 후 Kruskal은 간선 양 끝 정점의 대표를 비교하고, Reverse-Delete는 간선을 임시 제거한 그래프를 BFS로 탐색한다. AC를 기각하는 조건과 BE를 복구하는 조건이 각각 어느 분기에 해당하는지 확인할 수 있다.</p>
     <div className="theory-card-grid theory-algorithm-editors">{main.map(group => <DocumentGroup group={group} key={group.title} />)}</div>
-    <details className="theory-disclosure theory-card"><summary>보조 의사코드 · 서로소인 집합 자료구조, 공통 검증과 BFS</summary><div className="theory-card-grid">{procedures.filter(group => !main.includes(group)).map(group => <DocumentGroup group={group} key={group.title} />)}</div></details>
+    <details className="theory-disclosure theory-card"><summary>보조 의사코드 · 서로소인 집합 자료구조와 BFS 연결 요소 탐색</summary><div className="theory-card-grid">{procedures.filter(group => !main.includes(group)).map(group => <DocumentGroup group={group} key={group.title} />)}</div></details>
   </>
 }
 function ComplexityPanel() {
